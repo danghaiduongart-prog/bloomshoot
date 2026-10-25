@@ -1,688 +1,568 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOOM SHOOT - Self-Booth Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #1c1c14;
-            color: #FDF0CD;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            user-select: none;
-        }
-        .bloom-bg {
-            background-color: #3b3a2f;
-            background-image: radial-gradient(circle, #4d4c3e 0%, #3b3a2f 100%);
-        }
-        .bloom-card {
-            background-color: rgba(50, 49, 39, 0.9);
-            border: 1px solid rgba(253, 240, 205, 0.2);
-            color: #FDF0CD;
-        }
-        .bloom-btn {
-            background-color: #FDF0CD;
-            color: #3b3a2f;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            border: 1px solid rgba(253, 240, 205, 0.4);
-        }
-        .bloom-btn:active {
-            transform: scale(0.97);
-            background-color: #e6d7b3;
-        }
-        #flash-overlay {
-            pointer-events: none;
-            transition: opacity 0.15s ease-out;
-        }
-        /* Lật ngang webcam giống như gương trên Live View */
-        #webcam {
-            transform: scaleX(-1);
-        }
-        .glass-badge {
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(4px);
-            color: #FDF0CD;
-            border: 1px solid rgba(253, 240, 205, 0.2);
-        }
-        .photo-thumb {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 3px solid transparent;
-        }
-        .photo-thumb.selected {
-            border-color: #FDF0CD;
-            transform: scale(1.03);
-            box-shadow: 0 0 12px rgba(253, 240, 205, 0.4);
-        }
-        .frame-option {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 3px solid transparent;
-        }
-        .frame-option.selected {
-            border-color: #FDF0CD;
-            transform: scale(1.05);
-            box-shadow: 0 0 12px rgba(253, 240, 205, 0.5);
-        }
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area {
-                position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-                display: flex; justify-content: center; align-items: center;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BLOOM SHOOT - Self Photobooth Studio</title>
+  <style>
+    :root {
+      --bg-purple: #1a0518;
+      --card-purple: #2a0826;
+      --accent-yellow: #fbe395;
+      --accent-gold: #d4af37;
+      --text-white: #ffffff;
+      --text-sub: #b3a5b3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #0b020a;
+      background-image: radial-gradient(circle at 50% 20%, #3a0d35 0%, #0b020a 70%);
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .app-viewport {
+      width: 100%;
+      max-width: 420px;
+      height: 90vh;
+      max-height: 850px;
+      background-color: var(--bg-purple);
+      border-radius: 28px;
+      border: 1px solid rgba(251, 227, 149, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(251, 227, 149, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .header {
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(26, 5, 24, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--accent-yellow);
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(251, 227, 149, 0.3);
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Screen 1: Phone Login */
+    .login-card {
+      background: var(--card-purple);
+      border-radius: 20px;
+      padding: 24px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: auto 0;
+      text-align: center;
+    }
+
+    .input-label {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .phone-input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--accent-yellow);
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 2px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--accent-gold) 100%);
+      color: #1a0518;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(251, 227, 149, 0.2);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* Screen 2: Photo Selection & Auto Fill */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .photo-item {
+      aspect-ratio: 1;
+      background: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .photo-item.selected {
+      border-color: var(--accent-yellow);
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .badge-check {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--accent-yellow);
+      color: #000;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .photo-item.selected .badge-check {
+      display: flex;
+    }
+
+    .autofill-banner {
+      background: rgba(251, 227, 149, 0.1);
+      border: 1px dashed var(--accent-yellow);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .autofill-btn {
+      background: var(--accent-yellow);
+      color: #1a0518;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 13px;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    /* Screen 3: Frame Customization (Cá Space Style) */
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-sub);
+      padding: 6px 14px;
+      border-radius: 16px;
+      white-space: nowrap;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-yellow);
+      color: #1a0518;
+      font-weight: bold;
+    }
+
+    .preview-canvas-wrap {
+      flex: 1;
+      background: #000;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .tools-panel {
+      background: var(--card-purple);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .slider {
+      width: 60%;
+      accent-color: var(--accent-yellow);
+    }
+
+    .filter-options {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+    }
+
+    .action-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--accent-yellow);
+      background: transparent;
+      color: var(--accent-yellow);
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Order Processing Overlay */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 2, 10, 0.92);
+      backdrop-filter: blur(8px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(251, 227, 149, 0.2);
+      border-top-color: var(--accent-yellow);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
-<body class="w-screen h-screen overflow-hidden flex justify-center items-center bg-black">
+<body>
 
-    <div id="print-area" class="hidden">
-        <img id="print-image" src="" alt="Print Frame">
+  <div class="app-viewport">
+    <div class="header">
+      <div class="brand-title">BLOOM SHOOT</div>
+      <div class="brand-subtitle">SELF PHOTOBOOTH STUDIO</div>
     </div>
 
-    <div class="w-full max-w-[480px] h-full max-h-[860px] flex flex-col justify-between p-3 relative bloom-bg border-x border-[#FDF0CD]/10 shadow-2xl rounded-none md:rounded-3xl my-auto">
+    <div class="content-area">
+      <!-- SCREEN 1: LOGIN -->
+      <div id="screen-1" class="screen active">
+        <div class="login-card">
+          <h3 style="margin-bottom: 8px; color: var(--accent-yellow);">NHẬP CA CHỤP</h3>
+          <span class="input-label">Vui lòng nhập Số điện thoại đã đăng ký</span>
+          <input type="tel" id="phone-input" class="phone-input" value="0901234567" placeholder="090 123 4567" />
+          <button class="btn-primary" onclick="goToScreen(2)">TRUY CẬP KHO ẢNH</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: SELECT PHOTOS / AUTO FILL -->
+      <div id="screen-2" class="screen">
+        <div class="autofill-banner">
+          <div style="font-size: 12px; color: var(--accent-yellow);">⚡ Tiết kiệm thời gian (Chuẩn Cá Space)</div>
+          <button class="autofill-btn" onclick="autoFill27()">Auto Fill 27 Photos Vào Frame</button>
+        </div>
         
-        <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 z-50 rounded-3xl"></div>
+        <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">Hoặc chọn thủ công 20 ảnh đẹp nhất:</div>
+        
+        <div class="photo-grid" id="photo-grid-container"></div>
+        
+        <button class="btn-primary" style="margin-top: auto;" onclick="goToScreen(3)">TIẾP TỤC: GHÉP FRAME</button>
+      </div>
 
-        <!-- POPUP XÁC NHẬN KẾT THÚC -->
-        <div id="custom-confirm" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-            <div class="bloom-card p-6 rounded-3xl w-full max-w-xs shadow-2xl text-center border border-[#FDF0CD]/30">
-                <div class="w-12 h-12 rounded-full bg-[#FDF0CD] text-[#3b3a2f] text-xl font-bold flex items-center justify-center mx-auto mb-3">📸</div>
-                <h3 class="text-base font-black tracking-wider text-[#FDF0CD] uppercase mb-2">Hoàn thành buổi chụp?</h3>
-                <p class="text-xs text-[#FDF0CD]/80 mb-6 leading-relaxed">Chuyển sang màn hình chọn mẫu khung & ghép ảnh?</p>
-                <div class="flex gap-3">
-                    <button type="button" id="cancel-confirm-btn" class="flex-1 bg-black/40 hover:bg-black/60 text-[#FDF0CD] py-3 rounded-2xl text-xs uppercase font-bold border border-[#FDF0CD]/20">Chụp tiếp</button>
-                    <button type="button" id="accept-confirm-btn" class="flex-1 bg-[#FDF0CD] hover:bg-[#e6d7b3] text-[#3b3a2f] py-3 rounded-2xl text-xs uppercase font-bold shadow-lg">Đồng ý</button>
-                </div>
-            </div>
+      <!-- SCREEN 3: FRAME & FILTER CUSTOMIZATION -->
+      <div id="screen-3" class="screen">
+        <div class="tabs-bar">
+          <button class="tab-btn active" onclick="switchFrame('strip')">Frame 1 (Dải Strip)</button>
+          <button class="tab-btn" onclick="switchFrame('grid')">Frame 2 (Lưới Grid)</button>
+          <button class="tab-btn" onclick="switchFrame('poster')">Frame 3 (Poster 20)</button>
         </div>
 
-        <!-- MÀN HÌNH 1: NHẬP MÃ PIN -->
-        <div id="pin-screen" class="absolute inset-0 bloom-bg z-40 flex flex-col items-center justify-center p-6 text-center rounded-3xl">
-            <div class="w-28 h-28 rounded-full overflow-hidden mb-4 shadow-xl border-2 border-[#FDF0CD]/40 flex items-center justify-center bg-[#2c2b22]">
-                <img id="main-logo" src="logo.png" class="w-full h-full object-cover p-2" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%233b3a2f\'/><text x=\'50%\' y=\'55%\' font-size=\'40\' font-weight=\'bold\' fill=\'%23FDF0CD\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-family=\'sans-serif\'>B</text></svg>'">
-            </div>
-            
-            <h1 class="text-2xl font-black tracking-widest text-[#FDF0CD] mb-1">BLOOM SHOOT</h1>
-            <p class="text-xs text-[#FDF0CD]/70 mb-8 tracking-wider font-medium">Self-Booth Studio Vũng Tàu</p>
-
-            <div class="bloom-card p-6 rounded-3xl w-full max-w-xs shadow-2xl">
-                <label class="block text-xs mb-3 font-bold text-[#FDF0CD] uppercase tracking-wider">Nhập mã PIN ca chụp (4 số):</label>
-                <input type="text" id="pin-input" maxlength="6" placeholder="••••" autocomplete="off" class="w-full text-center text-3xl tracking-widest py-3 rounded-2xl bg-black/50 border border-[#FDF0CD]/40 text-[#FDF0CD] focus:outline-none focus:border-[#FDF0CD] mb-4 font-mono">
-                <button type="button" id="start-btn" class="w-full bloom-btn py-3.5 rounded-2xl text-sm tracking-wider uppercase shadow-lg">BẮT ĐẦU CA CHỤP</button>
-                <p id="pin-error" class="text-xs text-amber-300 mt-3 font-medium hidden">⚠️ Vui lòng nhập mã PIN!</p>
-            </div>
-            
-            <p class="text-[11px] text-[#FDF0CD]/40 mt-8">Hệ thống phòng chụp tự động BLOOM SHOOT</p>
+        <div class="preview-canvas-wrap">
+          <canvas id="photoCanvas" width="800" height="1200"></canvas>
         </div>
 
-        <!-- MÀN HÌNH 2: GIAO DIỆN CHỤP -->
-        <div id="shoot-screen" class="hidden flex-1 flex flex-col h-full justify-between gap-2">
-            
-            <div class="bloom-card rounded-2xl p-2 flex-1 flex flex-col relative overflow-hidden shadow-inner">
-                <div class="absolute top-3 left-3 glass-badge px-3 py-1 rounded-full text-[10px] font-bold tracking-wider z-10">🔴 LIVE VIEW MÁY ẢNH</div>
-                <div class="w-full h-full bg-black/80 rounded-xl overflow-hidden relative flex items-center justify-center border border-[#FDF0CD]/10">
-                    <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
-                    <canvas id="simulated-canvas" class="w-full h-full object-cover hidden"></canvas>
-                </div>
+        <div class="tools-panel">
+          <div class="control-row">
+            <span>Zoom góc mặt:</span>
+            <input type="range" class="slider" min="100" max="200" value="120" oninput="updateCanvasZoom(this.value)" />
+          </div>
+          <div class="control-row">
+            <span>Bộ lọc màu:</span>
+            <div class="filter-options">
+              <button class="filter-btn active" onclick="applyFilter('original', this)">Original</button>
+              <button class="filter-btn" onclick="applyFilter('bw', this)">B&W</button>
+              <button class="filter-btn" onclick="applyFilter('vintage', this)">Vintage</button>
             </div>
-
-            <div class="bloom-card rounded-2xl px-4 py-2 flex justify-between items-center shadow-md my-0.5">
-                <div class="flex items-center space-x-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#FDF0CD]">PIN: <span id="current-pin-badge" class="text-white">----</span></span>
-                </div>
-                <div id="timer-display" class="text-lg font-mono font-black text-[#FDF0CD] bg-black/50 px-3 py-0.5 rounded-xl border border-[#FDF0CD]/20">10:00</div>
-                <div class="text-xs font-semibold text-[#FDF0CD]/90">Ảnh: <span id="photo-count" class="text-white font-extrabold text-base">0</span></div>
-            </div>
-
-            <div class="bloom-card rounded-2xl p-2 flex-1 flex flex-col relative overflow-hidden shadow-inner">
-                <div class="absolute top-3 left-3 glass-badge px-3 py-1 rounded-full text-[10px] font-bold tracking-wider z-10">✨ REVIEW ẢNH</div>
-                <div class="w-full h-full bg-black/60 rounded-xl overflow-hidden relative flex items-center justify-center border border-[#FDF0CD]/10 p-1" id="preview-box">
-                    <div class="text-center p-4">
-                        <span class="text-3xl block mb-2 opacity-50">📸</span>
-                        <p class="text-xs text-[#FDF0CD]/50">Bấm Remote hoặc Space để chụp</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-                <button type="button" id="shoot-btn" class="flex-1 bloom-btn py-3.5 rounded-2xl text-center font-black shadow-lg text-xs tracking-wider uppercase flex items-center justify-center gap-1.5">
-                    <span>📸 BẤM REMOTE CHỤP</span>
-                </button>
-                <button type="button" id="end-session-btn" class="bg-[#FDF0CD] hover:bg-[#e6d7b3] text-[#3b3a2f] font-black px-4 py-3.5 rounded-2xl text-xs transition shadow-md whitespace-nowrap cursor-pointer">
-                    Chọn Khung & Ảnh
-                </button>
-            </div>
+          </div>
         </div>
 
-        <!-- MÀN HÌNH 3: CHỌN MẪU KHUNG & CHỌN ẢNH GHÉP -->
-        <div id="frame-screen" class="hidden absolute inset-0 bloom-bg z-40 flex flex-col justify-between p-4 rounded-3xl">
-            <div class="flex justify-between items-center pb-2 border-b border-[#FDF0CD]/20">
-                <span class="text-xs font-black tracking-wider text-[#FDF0CD] uppercase">CHỌN MẪU & CÂN CHỈNH ẢNH</span>
-                <span class="text-[10px] bg-[#FDF0CD]/20 px-2 py-1 rounded-lg text-[#FDF0CD]">Đã chọn: <b id="selected-count" class="text-white text-xs">0</b>/<span id="max-slots">3</span></span>
-            </div>
-
-            <div class="flex gap-2 my-2 overflow-x-auto pb-1" id="frame-selector-container">
-                <span class="text-[10px] text-[#FDF0CD]/80 uppercase self-center whitespace-nowrap">Chọn mẫu:</span>
-                <div class="flex gap-2" id="frame-list">
-                    <div class="frame-option selected w-12 h-16 rounded-lg overflow-hidden bg-black/50 border border-[#FDF0CD]/30" onclick="selectFrame('frame.png', this)"><img src="frame.png" class="w-full h-full object-cover"></div>
-                    <div class="frame-option w-12 h-16 rounded-lg overflow-hidden bg-black/50 border border-[#FDF0CD]/30" onclick="selectFrame('frame (2).png', this)"><img src="frame (2).png" class="w-full h-full object-cover"></div>
-                    <div class="frame-option w-12 h-16 rounded-lg overflow-hidden bg-black/50 border border-[#FDF0CD]/30" onclick="selectFrame('frame (3).png', this)"><img src="frame (3).png" class="w-full h-full object-cover"></div>
-                    <div class="frame-option w-12 h-16 rounded-lg overflow-hidden bg-black/50 border border-[#FDF0CD]/30" onclick="selectFrame('frame (4).png', this)"><img src="frame (4).png" class="w-full h-full object-cover"></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 flex-1 my-1 overflow-hidden">
-                <div class="bloom-card p-2 rounded-2xl flex flex-col h-full overflow-hidden shadow-sm">
-                    <span class="text-[10px] font-bold text-[#FDF0CD]/80 mb-2 block uppercase text-center">1. Nhấp chọn ảnh:</span>
-                    <div id="photo-grid" class="flex-1 overflow-y-auto grid grid-cols-2 gap-1.5 p-1"></div>
-                </div>
-
-                <div class="bloom-card p-2 rounded-2xl flex flex-col items-center justify-between h-full relative overflow-hidden shadow-sm">
-                    <span class="text-[10px] font-bold text-[#FDF0CD]/80 uppercase text-center">2. Kéo & Zoom khung:</span>
-                    <div class="w-full flex-1 relative flex items-center justify-center overflow-hidden my-1 rounded-xl bg-black/50 p-1 border border-[#FDF0CD]/20">
-                        <canvas id="frame-canvas" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-grab active:cursor-grabbing"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-2 pt-1">
-                <button type="button" id="refresh-preview-btn" class="flex-1 bg-black/40 hover:bg-black/60 text-[#FDF0CD] font-bold py-3 rounded-2xl text-xs uppercase tracking-wider border border-[#FDF0CD]/30">
-                    🔄 Đặt Lại
-                </button>
-                <button type="button" id="save-print-btn" class="flex-1 bloom-btn py-3 rounded-2xl text-xs uppercase font-black tracking-wider shadow-xl flex items-center justify-center gap-2">
-                    <span>🖨️ IN ẢNH VÀ KẾT THÚC</span>
-                </button>
-            </div>
+        <div class="action-group">
+          <button class="btn-secondary" onclick="savePhoto()">SAVE PHOTO</button>
+          <button class="btn-primary" style="flex: 1.2;" onclick="orderPrint()">ORDER (IN ẢNH)</button>
         </div>
-
+      </div>
     </div>
 
-    <script>
-        let currentPin = "";
-        let timeLeft = 600;
-        let timerInterval = null;
-        let photoCount = 0;
-        let capturedPhotos = []; 
-        let selectedIndices = []; 
-        let selectedFrameFile = 'frame.png'; 
+    <!-- ORDER PROCESSING OVERLAY -->
+    <div id="order-overlay" class="overlay">
+      <div id="overlay-spinner" class="spinner"></div>
+      <h3 id="overlay-title" style="color: var(--accent-yellow); margin-bottom: 8px;">Preparing Order...</h3>
+      <p id="overlay-msg" style="font-size: 13px; color: var(--text-sub);">Vui lòng giữ nguyên màn hình trong giây lát!</p>
+      <button id="overlay-close-btn" class="btn-primary" style="margin-top: 20px; display: none;" onclick="resetApp()">TẠO ĐƠN HÀNG MỚI</button>
+    </div>
+  </div>
 
-        let slotTransformations = {}; 
-        let activeSlotIndex = null;
-        let isDragging = false;
-        let startX = 0, startY = 0;
+  <script>
+    let selectedPhotos = [];
+    let currentFrame = 'strip';
+    let currentFilter = 'original';
+    let zoomLevel = 1.2;
+    const sampleImages = [];
 
-        const SERVER_URL = "http://127.0.0.1:5000";
+    // Tạo ảnh mẫu Placeholder nghệ thuật
+    for (let i = 1; i <= 27; i++) {
+      sampleImages.push(`https://picsum.photos/seed/bloom_${i}/300/300`);
+    }
 
-        const frameConfigurations = {
-            'frame.png': [
-                { x: 0.14, y: 0.12, w: 0.72, h: 0.19 },
-                { x: 0.18, y: 0.35, w: 0.64, h: 0.20 },
-                { x: 0.14, y: 0.58, w: 0.72, h: 0.19 }
-            ],
-            'frame (2).png': [
-                { x: 0.14, y: 0.14, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.34, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.53, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.73, w: 0.72, h: 0.15 }
-            ],
-            'frame (3).png': [
-                { x: 0.14, y: 0.14, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.34, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.53, w: 0.72, h: 0.15 },
-                { x: 0.14, y: 0.73, w: 0.72, h: 0.15 }
-            ],
-            'frame (4).png': [
-                { x: 0.16, y: 0.11, w: 0.68, h: 0.17 },
-                { x: 0.16, y: 0.30, w: 0.68, h: 0.17 },
-                { x: 0.16, y: 0.49, w: 0.68, h: 0.17 },
-                { x: 0.16, y: 0.68, w: 0.68, h: 0.17 }
-            ],
-            'default': [
-                { x: 0.10, y: 0.08, w: 0.80, h: 0.26 },
-                { x: 0.10, y: 0.37, w: 0.80, h: 0.26 },
-                { x: 0.10, y: 0.66, w: 0.80, h: 0.26 }
-            ]
+    function initScreen2() {
+      const container = document.getElementById('photo-grid-container');
+      container.innerHTML = '';
+      sampleImages.slice(0, 12).forEach((url, idx) => {
+        const item = document.createElement('div');
+        item.className = 'photo-item' + (idx < 4 ? ' selected' : '');
+        item.onclick = () => {
+          item.classList.toggle('selected');
         };
+        item.innerHTML = `<img src="${url}" /><div class="badge-check">✓</div>`;
+        container.appendChild(item);
+      });
+    }
 
-        window.addEventListener('DOMContentLoaded', function() {
-            const pinInput = document.getElementById('pin-input');
-            if (pinInput) pinInput.focus();
-            initCamera();
+    function autoFill27() {
+      selectedPhotos = [...sampleImages];
+      goToScreen(3);
+    }
 
-            document.getElementById('start-btn').addEventListener('click', verifyPin);
-            pinInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') verifyPin(); });
+    function goToScreen(screenNum) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${screenNum}`).classList.add('active');
+      if (screenNum === 2) initScreen2();
+      if (screenNum === 3) renderCanvas();
+    }
 
-            document.getElementById('shoot-btn').addEventListener('click', takePhoto);
-            document.getElementById('end-session-btn').addEventListener('click', openConfirmModal);
-            
-            document.getElementById('cancel-confirm-btn').addEventListener('click', closeConfirmModal);
-            document.getElementById('accept-confirm-btn').addEventListener('click', executeEndSession);
+    function switchFrame(frameType) {
+      currentFrame = frameType;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderCanvas();
+    }
 
-            document.getElementById('refresh-preview-btn').addEventListener('click', resetTransforms);
-            document.getElementById('save-print-btn').addEventListener('click', saveAndPrintFrame);
+    function updateCanvasZoom(val) {
+      zoomLevel = val / 100;
+      renderCanvas();
+    }
 
-            initTouchAndMouseListeners();
-        });
+    function applyFilter(filterName, btn) {
+      currentFilter = filterName;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCanvas();
+    }
 
-        function initCamera() {
-            const video = document.getElementById('webcam');
-            navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false })
-                .then(stream => {
-                    video.srcObject = stream;
-                })
-                .catch(err => {
-                    console.log("Không thể bật webcam trực tiếp: ", err);
-                    alert("Không thể kết nối Webcam! Vui lòng kiểm tra lại thiết bị.");
-                });
+    function renderCanvas() {
+      const canvas = document.getElementById('photoCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Vẽ background khung tím nghệ thuật BLOOM SHOOT
+      ctx.fillStyle = '#2a0826';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Vẽ Header Logo trong Frame
+      ctx.fillStyle = '#fbe395';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('BLOOM SHOOT', canvas.width / 2, 60);
+
+      // Bố cục vẽ ảnh dựa trên mẫu Frame
+      const cols = currentFrame === 'strip' ? 2 : (currentFrame === 'grid' ? 3 : 4);
+      const rows = currentFrame === 'strip' ? 4 : (currentFrame === 'grid' ? 4 : 5);
+      const margin = 20;
+      const startY = 90;
+      const cellW = (canvas.width - margin * (cols + 1)) / cols;
+      const cellH = (canvas.height - startY - 80 - margin * (rows + 1)) / rows;
+
+      let imgIdx = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = margin + c * (cellW + margin);
+          const y = startY + r * (cellH + margin);
+
+          ctx.fillStyle = '#1a0518';
+          ctx.fillRect(x, y, cellW, cellH);
+
+          // Vẽ hiệu ứng ô ảnh
+          ctx.strokeStyle = '#fbe395';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, cellW, cellH);
+
+          ctx.fillStyle = 'rgba(251, 227, 149, 0.4)';
+          ctx.font = '14px sans-serif';
+          ctx.fillText(`Photo #${imgIdx + 1}`, x + cellW/2, y + cellH/2);
+
+          imgIdx++;
         }
+      }
 
-        function verifyPin() {
-            const pinInput = document.getElementById('pin-input');
-            const input = pinInput ? pinInput.value.trim() : "";
-            currentPin = input.length > 0 ? input : "1111";
+      // Footer Khung
+      ctx.fillStyle = '#b3a5b3';
+      ctx.font = '16px sans-serif';
+      ctx.fillText('www.bloomshoot.vn • Self Photobooth', canvas.width / 2, canvas.height - 30);
+    }
 
-            document.getElementById('current-pin-badge').innerText = currentPin;
-            document.getElementById('pin-screen').classList.add('hidden');
-            document.getElementById('shoot-screen').classList.remove('hidden');
-            const pinError = document.getElementById('pin-error');
-            if(pinError) pinError.classList.add('hidden');
+    function savePhoto() {
+      const canvas = document.getElementById('photoCanvas');
+      const link = document.createElement('a');
+      link.download = `BLOOM_SHOOT_FRAME_${Date.now()}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    }
 
-            fetch(`${SERVER_URL}/create_pin_folder`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: currentPin })
-            }).catch(err => console.log("Lỗi kết nối Python server"));
+    function orderPrint() {
+      const overlay = document.getElementById('order-overlay');
+      const title = document.getElementById('overlay-title');
+      const msg = document.getElementById('overlay-msg');
+      const spinner = document.getElementById('overlay-spinner');
+      const closeBtn = document.getElementById('overlay-close-btn');
 
-            startSession();
-        }
+      overlay.classList.add('active');
+      spinner.style.display = 'block';
+      closeBtn.style.display = 'none';
+      title.innerText = 'Preparing & Uploading Prints...';
+      msg.innerText = 'Đang truyền file về hệ thống máy in tại booth. Vui lòng giữ màn hình này!';
 
-        function startSession() {
-            timeLeft = 600; photoCount = 0; capturedPhotos = []; selectedIndices = [];
-            slotTransformations = {};
-            document.getElementById('photo-count').innerText = photoCount;
-            updateTimer();
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--; updateTimer();
-                if (timeLeft <= 0) endSession();
-            }, 1000);
-        }
+      // Giả lập quy trình gửi lệnh ngầm sang Backend Python
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        title.innerText = 'THANK YOU!';
+        const orderId = 'BS-' + Math.floor(100000 + Math.random() * 900000);
+        msg.innerHTML = `Lệnh in đã được xác nhận thành công!<br><strong style="color:var(--accent-yellow); font-size:16px;">Mã Đơn Hàng: ${orderId}</strong><br>Vui lòng đợi nhận ảnh tại quầy tiệm.`;
+        closeBtn.style.display = 'block';
+      }, 2500);
+    }
 
-        function updateTimer() {
-            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const s = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${m}:${s}`;
-        }
-
-        function takePhoto() {
-            const flash = document.getElementById('flash-overlay');
-            flash.style.opacity = '0.95'; setTimeout(() => flash.style.opacity = '0', 120);
-            photoCount++;
-            document.getElementById('photo-count').innerText = photoCount;
-
-            const video = document.getElementById('webcam');
-            const previewBox = document.getElementById('preview-box');
-            let imgUrl = "";
-
-            if (video && video.videoWidth > 0) {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth; 
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                
-                // Vẽ trực tiếp ảnh nguyên bản không lật canvas, giữ đúng góc nhìn như cam live
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                imgUrl = canvas.toDataURL('image/png');
-                // Bỏ lật ngang ở khung review để hiển thị khớp 100% với live view
-                previewBox.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-xl shadow-lg">`;
-            } else {
-                alert("Webcam chưa sẵn sàng, vui lòng thử lại!");
-                return;
-            }
-
-            capturedPhotos.push(imgUrl);
-
-            // Gửi ảnh gốc xuống server Python lưu trực tiếp
-            setTimeout(() => {
-                fetch(`${SERVER_URL}/save_photo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin: currentPin, image: imgUrl, is_merged: false })
-                }).catch(err => console.log("Lỗi lưu ảnh gốc"));
-            }, 100);
-        }
-
-        function openConfirmModal() { document.getElementById('custom-confirm').classList.remove('hidden'); }
-        function closeConfirmModal() { document.getElementById('custom-confirm').classList.add('hidden'); }
-        function executeEndSession() { closeConfirmModal(); endSession(); }
-
-        function selectFrame(filename, element) {
-            selectedFrameFile = filename;
-            document.querySelectorAll('.frame-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-
-            const currentSlots = frameConfigurations[selectedFrameFile] || frameConfigurations['default'];
-            document.getElementById('max-slots').innerText = currentSlots.length;
-
-            if (selectedIndices.length > currentSlots.length) {
-                selectedIndices = selectedIndices.slice(0, currentSlots.length);
-                updateThumbnailsSelection();
-            }
-
-            renderFramePreview();
-        }
-
-        function endSession() {
-            clearInterval(timerInterval);
-            document.getElementById('shoot-screen').classList.add('hidden');
-            document.getElementById('frame-screen').classList.remove('hidden');
-            
-            const currentSlots = frameConfigurations[selectedFrameFile] || frameConfigurations['default'];
-            document.getElementById('max-slots').innerText = currentSlots.length;
-
-            const grid = document.getElementById('photo-grid');
-            grid.innerHTML = '';
-            
-            if (capturedPhotos.length === 0) {
-                grid.innerHTML = `<p class="col-span-2 text-xs text-[#FDF0CD]/50 text-center py-8">Chưa có ảnh nào được chụp.</p>`;
-                return;
-            }
-
-            capturedPhotos.forEach((imgSrc, idx) => {
-                const thumb = document.createElement('div');
-                thumb.className = `photo-thumb aspect-4/5 bg-black/60 rounded-xl overflow-hidden relative shadow-md`;
-                thumb.onclick = () => toggleSelectPhoto(idx, thumb);
-                thumb.innerHTML = `
-                    <img src="${imgSrc}" class="w-full h-full object-cover">
-                    <span class="absolute top-1 left-1 glass-badge px-1.5 py-0.5 rounded-full text-[8px] text-[#FDF0CD] font-mono z-10">#${idx + 1}</span>
-                `;
-                grid.appendChild(thumb);
-            });
-
-            selectedIndices = [];
-            slotTransformations = {};
-            const thumbs = grid.children;
-            const takeNum = Math.min(currentSlots.length, capturedPhotos.length);
-            for (let i = Math.max(0, capturedPhotos.length - takeNum); i < capturedPhotos.length; i++) {
-                if (thumbs[i]) toggleSelectPhoto(i, thumbs[i]);
-            }
-        }
-
-        function toggleSelectPhoto(index, element) {
-            const currentSlots = frameConfigurations[selectedFrameFile] || frameConfigurations['default'];
-            const pos = selectedIndices.indexOf(index);
-            if (pos > -1) {
-                selectedIndices.splice(pos, 1);
-                if (element) element.classList.remove('selected');
-            } else {
-                if (selectedIndices.length >= currentSlots.length) {
-                    alert(`Mẫu khung này chỉ cần chọn tối đa ${currentSlots.length} ảnh!`);
-                    return;
-                }
-                selectedIndices.push(index);
-                if (element) element.classList.add('selected');
-            }
-            document.getElementById('selected-count').innerText = selectedIndices.length;
-            renderFramePreview();
-        }
-
-        function updateThumbnailsSelection() {
-            const thumbs = document.getElementById('photo-grid').children;
-            for (let i = 0; i < thumbs.length; i++) {
-                if (selectedIndices.includes(i)) {
-                    thumbs[i].classList.add('selected');
-                } else {
-                    thumbs[i].classList.remove('selected');
-                }
-            }
-            document.getElementById('selected-count').innerText = selectedIndices.length;
-        }
-
-        function resetTransforms() {
-            slotTransformations = {};
-            renderFramePreview();
-        }
-
-        function initTouchAndMouseListeners() {
-            const canvas = document.getElementById('frame-canvas');
-
-            function getTouchPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: (clientX - rect.left) * (canvas.width / rect.width),
-                    y: (clientY - rect.top) * (canvas.height / rect.height)
-                };
-            }
-
-            canvas.addEventListener('mousedown', startDrag);
-            canvas.addEventListener('touchstart', startDrag, { passive: false });
-
-            window.addEventListener('mousemove', drag);
-            window.addEventListener('touchmove', drag, { passive: false });
-
-            window.addEventListener('mouseup', endDrag);
-            window.addEventListener('touchend', endDrag);
-
-            canvas.addEventListener('wheel', function(e) {
-                e.preventDefault();
-                if (activeSlotIndex === null) return;
-                
-                if (!slotTransformations[activeSlotIndex]) {
-                    slotTransformations[activeSlotIndex] = { x: 0, y: 0, scale: 1 };
-                }
-
-                let t = slotTransformations[activeSlotIndex];
-                if (e.deltaY < 0) {
-                    t.scale += 0.05;
-                } else {
-                    t.scale = Math.max(0.5, t.scale - 0.05);
-                }
-                renderFramePreview();
-            }, { passive: false });
-
-            function startDrag(e) {
-                const pos = getTouchPos(e);
-                const currentSlotsPercent = frameConfigurations[selectedFrameFile] || frameConfigurations['default'];
-
-                activeSlotIndex = null;
-                selectedIndices.forEach((photoIdx, slotIdx) => {
-                    if (slotIdx < currentSlotsPercent.length) {
-                        const p = currentSlotsPercent[slotIdx];
-                        const x = p.x * canvas.width;
-                        const y = p.y * canvas.height;
-                        const w = p.w * canvas.width;
-                        const h = p.h * canvas.height;
-
-                        if (pos.x >= x && pos.x <= x + w && pos.y >= y && pos.y <= y + h) {
-                            activeSlotIndex = slotIdx;
-                        }
-                    }
-                });
-
-                if (activeSlotIndex !== null) {
-                    isDragging = true;
-                    startX = e.touches ? e.touches[0].clientX : e.clientX;
-                    startY = e.touches ? e.touches[0].clientY : e.clientY;
-                }
-            }
-
-            function drag(e) {
-                if (!isDragging || activeSlotIndex === null) return;
-                e.preventDefault();
-
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                const dx = (clientX - startX) * (canvas.width / canvas.clientWidth);
-                const dy = (clientY - startY) * (canvas.height / canvas.clientHeight);
-
-                startX = clientX;
-                startY = clientY;
-
-                if (!slotTransformations[activeSlotIndex]) {
-                    slotTransformations[activeSlotIndex] = { x: 0, y: 0, scale: 1 };
-                }
-
-                slotTransformations[activeSlotIndex].x += dx;
-                slotTransformations[activeSlotIndex].y += dy;
-
-                renderFramePreview();
-            }
-
-            function endDrag() {
-                isDragging = false;
-            }
-        }
-
-        function drawImagePropCustom(ctx, img, x, y, w, h, t) {
-            var imgRatio = img.width / img.height;
-            var slotRatio = w / h;
-            var nw, nh, nx, ny;
-
-            if (imgRatio > slotRatio) {
-                nh = h; nw = h * imgRatio;
-                nx = x + (w - nw) / 2; ny = y;
-            } else {
-                nw = w; nh = w / imgRatio;
-                nx = x; ny = y + (h - nh) / 2;
-            }
-
-            const scale = t.scale || 1;
-            const finalW = nw * scale;
-            const finalH = nh * scale;
-            const finalX = nx - (finalW - nw) / 2 + (t.x || 0);
-            const finalY = ny - (finalH - nh) / 2 + (t.y || 0);
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(x, y, w, h);
-            ctx.clip(); 
-            // Vẽ ảnh chuẩn vào khung ghép không bị lật ngược
-            ctx.drawImage(img, finalX + (t.x || 0), finalY + (t.y || 0), finalW, finalH);
-            ctx.restore();
-        }
-
-        function renderFramePreview(callback) {
-            const canvas = document.getElementById('frame-canvas');
-            const ctx = canvas.getContext('2d');
-
-            const currentSlotsPercent = frameConfigurations[selectedFrameFile] || frameConfigurations['default'];
-
-            const frameImg = new Image();
-            frameImg.src = selectedFrameFile;
-
-            const drawContent = () => {
-                canvas.width = frameImg.naturalWidth || 1200;
-                canvas.height = frameImg.naturalHeight || 1800;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                if (selectedIndices.length === 0) {
-                    if (frameImg.complete && frameImg.naturalWidth > 0) {
-                        ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                    }
-                    if (callback) callback();
-                    return;
-                }
-
-                let loadedCount = 0;
-                selectedIndices.forEach((photoIdx, slotIdx) => {
-                    if (slotIdx < currentSlotsPercent.length) {
-                        const p = currentSlotsPercent[slotIdx];
-                        const x = p.x * canvas.width;
-                        const y = p.y * canvas.height;
-                        const w = p.w * canvas.width;
-                        const h = p.h * canvas.height;
-
-                        if (!slotTransformations[slotIdx]) {
-                            slotTransformations[slotIdx] = { x: 0, y: 0, scale: 1 };
-                        }
-                        const t = slotTransformations[slotIdx];
-
-                        const img = new Image();
-                        img.src = capturedPhotos[photoIdx];
-                        img.onload = () => {
-                            drawImagePropCustom(ctx, img, x, y, w, h, t);
-                            loadedCount++;
-                            if (loadedCount === selectedIndices.length) {
-                                if (frameImg.complete && frameImg.naturalWidth > 0) {
-                                    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                                }
-                                if (callback) callback();
-                            }
-                        };
-                        img.onerror = () => {
-                            loadedCount++;
-                            if (loadedCount === selectedIndices.length) {
-                                if (frameImg.complete && frameImg.naturalWidth > 0) {
-                                    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                                }
-                                if (callback) callback();
-                            }
-                        };
-                    }
-                });
-            };
-
-            frameImg.onload = drawContent;
-            frameImg.onerror = () => { if (callback) callback(); };
-            if (frameImg.complete) drawContent();
-        }
-
-        function saveAndPrintFrame() {
-            if (selectedIndices.length === 0) {
-                alert("Vui lòng chọn ít nhất 1 ảnh ghép vào khung!");
-                return;
-            }
-
-            renderFramePreview(() => {
-                const canvas = document.getElementById('frame-canvas');
-                
-                try {
-                    const finalDataUrl = canvas.toDataURL('image/png');
-                    // Gửi tấm ảnh ghép hoàn chỉnh lưu xuống thư mục PIN trên máy tính
-                    fetch(`${SERVER_URL}/save_photo`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ pin: currentPin, image: finalDataUrl, is_merged: true })
-                    }).catch(err => console.log("Lỗi lưu ảnh ghép"));
-
-                    const printImg = document.getElementById('print-image');
-                    printImg.src = finalDataUrl;
-                } catch(e) {
-                    console.log("Xử lý in qua canvas local");
-                }
-
-                setTimeout(() => {
-                    window.print();
-                    resetToPin();
-                }, 500);
-            });
-        }
-
-        function resetToPin() {
-            const pinInput = document.getElementById('pin-input');
-            pinInput.value = '';
-            currentPin = "";
-            document.getElementById('frame-screen').classList.add('hidden');
-            document.getElementById('pin-screen').classList.remove('hidden');
-            pinInput.focus();
-        }
-
-        window.addEventListener('keydown', function(e) {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (!document.getElementById('shoot-screen').classList.contains('hidden')) takePhoto();
-            }
-        });
-    </script>
+    function resetApp() {
+      document.getElementById('order-overlay').classList.remove('active');
+      goToScreen(1);
+    }
+  </script>
 </body>
 </html>
