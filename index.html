@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOOM SHOOT - Self Photobooth Studio</title>
+    <title>BLOOM SHOOT - Kho Ảnh Của Bạn</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
@@ -11,17 +11,16 @@
         header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a0826; }
         .brand { font-size: 20px; font-weight: bold; color: #fbe395; letter-spacing: 2px; }
         .brand span { display: block; font-size: 10px; color: #b3a5b3; letter-spacing: 1px; margin-top: 2px; }
-        .nav-btns { display: flex; gap: 10px; }
         .btn-icon { background: #1a0518; border: 1px solid #2a0826; color: #fbe395; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
         .btn-icon:hover { background: #2a0826; }
 
-        /* Màn hình Nhập Mã */
+        /* Màn hình Nhập Mã Vé */
         .login-card { background: #1a0518; padding: 40px 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; max-width: 380px; width: 90%; margin-top: 80px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .login-card h1 { color: #fbe395; font-size: 22px; margin-bottom: 6px; }
         .login-card p { color: #b3a5b3; font-size: 13px; margin-bottom: 25px; }
         .code-input { width: 100%; padding: 14px; font-size: 28px; font-weight: bold; text-align: center; border-radius: 12px; border: 2px solid #2a0826; background: #0b020a; color: #fbe395; letter-spacing: 6px; margin-bottom: 15px; }
         .code-input:focus { outline: none; border-color: #d4af37; }
-        .btn-main { width: 100%; background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+        .btn-main { width: 100%; background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
         .btn-main:hover { opacity: 0.9; }
 
         /* Studio Workspace */
@@ -33,23 +32,19 @@
         .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; margin-top: 15px; }
         .photo-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; aspect-ratio: 3/4; background: #0b020a; }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .photo-item:hover { border-color: #d4af37; }
         
         .action-bar { display: flex; gap: 10px; margin-top: 15px; }
         .btn-sub { flex: 1; background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-sub:hover { background: #2a0826; }
 
-        /* Khu vực Chọn Khung & Canvas A4 */
+        /* Khung & Canvas A4 */
         .frame-section { width: 450px; display: flex; flex-direction: column; align-items: center; }
         .frame-select-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-bottom: 15px; }
         .btn-frame { background: #0b020a; border: 1px solid #2a0826; color: #b3a5b3; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
         .btn-frame.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
         canvas { width: 100%; max-height: 550px; object-fit: contain; border-radius: 8px; background: #0b020a; border: 1px solid #2a0826; margin-bottom: 15px; }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100; }
-        .modal-body { background: #1a0518; border: 1px solid #2a0826; padding: 25px; border-radius: 16px; width: 90%; max-width: 450px; }
-        .modal-body h3 { color: #fbe395; margin-bottom: 15px; }
-        .modal-body input { width: 100%; padding: 12px; background: #0b020a; border: 1px solid #2a0826; color: white; border-radius: 8px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -57,26 +52,25 @@
     <header>
         <div class="brand">
             BLOOM SHOOT
-            <span>SELF PHOTOBOOTH STUDIO</span>
+            <span>VŨNG TÀU PHOTOBOTH</span>
         </div>
-        <div class="nav-btns">
-            <button class="btn-icon" id="btnChangeCode" style="display: none;" onclick="resetToLogin()">⚙️ Đổi mã vé</button>
-            <button class="btn-icon" onclick="openConfigModal()">🌐 Cấu hình Server</button>
+        <div>
+            <button class="btn-icon" id="btnChangeCode" style="display: none;" onclick="location.reload()">⚙️ Đổi mã vé</button>
         </div>
     </header>
 
-    <!-- Màn hình 1: Nhập Mã -->
+    <!-- Màn hình Nhập Mã -->
     <div class="login-card" id="loginCard">
         <h1>NHẬP MÃ VÉ</h1>
-        <p>Nhập mã phiên chụp của bạn để xem kho ảnh</p>
+        <p>Nhập mã phiên chụp của bạn để xem và tải ảnh</p>
         <input type="text" id="ticketCodeInput" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
         <button class="btn-main" onclick="startStudioSession()">XEM KHO ẢNH</button>
     </div>
 
-    <!-- Màn hình 2: Studio Chính -->
-    <div class="studio-container" id="studioContainer" style="display: none; display: grid; grid-template-columns: 1fr 460px;">
+    <!-- Màn hình Studio -->
+    <div class="studio-container" id="studioContainer">
         
-        <!-- Trái: Danh sách ảnh gốc -->
+        <!-- Trái: Ảnh gốc -->
         <div class="section-box photos-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color: #fbe395; font-size: 16px;">📸 KHO ẢNH CHỤP GỐC</h3>
@@ -85,15 +79,12 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="fetchPhotos()">🔄 Cập nhật ảnh mới</button>
                 <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
-            </div>
-            <div class="action-bar" style="margin-top: 8px;">
-                <button class="btn-sub" style="width: 100%; background: #2a0826;" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
+                <button class="btn-sub" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
             </div>
         </div>
 
-        <!-- Phải: Chọn Khung A4 & In ấn -->
+        <!-- Phải: Chọn Khung A4 & In -->
         <div class="section-box frame-section">
             <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">🎨 CHỌN KHUNG GHÉP (A4)</h3>
             
@@ -105,46 +96,19 @@
 
             <canvas id="a4Canvas" width="2480" height="3508"></canvas>
 
-            <button class="btn-main" onclick="printOrDownloadA4()">🖨️ TẢI FILE KHUNG A4 ĐỂ IN</button>
-        </div>
-    </div>
-
-    <!-- Modal Cấu Hình Server -->
-    <div class="modal" id="configModal">
-        <div class="modal-body">
-            <h3>🌐 Cấu Hình Đường Dẫn Server Booth</h3>
-            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập link Ngrok (VD: https://xxxx.ngrok-free.dev):</p>
-            <input type="text" id="serverUrlInput">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-sub" onclick="closeConfigModal()">Hủy</button>
-                <button class="btn-main" onclick="saveServerConfig()">Lưu</button>
-            </div>
+            <button class="btn-main" onclick="printOrDownloadA4()">🖨️ TẢI FILE KHUNG A4</button>
         </div>
     </div>
 
 <script>
-    let DEFAULT_SERVER = "https://colt-ellipse-flagman.ngrok-free.dev";
-    let serverUrl = localStorage.getItem('bloom_server_url') || DEFAULT_SERVER;
+    // Link server Python ở quán của anh (Nếu đưa lên Vercel chạy Cloud hoặc chạy LAN thì trỏ về đây)
+    let serverUrl = "http://localhost:5001"; // Hoặc link server Python public của anh
     let activeCode = "";
     let availablePhotos = [];
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
-    let pollInterval = null;
 
-    document.getElementById('serverUrlInput').value = serverUrl;
-
-    function openConfigModal() { document.getElementById('configModal').style.display = 'flex'; }
-    function closeConfigModal() { document.getElementById('configModal').style.display = 'none'; }
-    function saveServerConfig() {
-        let val = document.getElementById('serverUrlInput').value.trim();
-        if (val.endsWith('/')) val = val.slice(0, -1);
-        serverUrl = val;
-        localStorage.setItem('bloom_server_url', serverUrl);
-        closeConfigModal();
-        if(activeCode) fetchPhotos();
-    }
-
-    function startStudioSession() {
+    async function startStudioSession() {
         let code = document.getElementById('ticketCodeInput').value.trim();
         if (!code) return alert("Vui lòng nhập mã vé!");
         activeCode = code;
@@ -154,54 +118,32 @@
         document.getElementById('btnChangeCode').style.display = 'block';
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
-        availablePhotos = [];
-        fetchPhotos();
-
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(fetchPhotos, 4000);
-    }
-
-    function resetToLogin() {
-        if (pollInterval) clearInterval(pollInterval);
-        activeCode = "";
-        assignedPhotos = {};
-        availablePhotos = [];
-        document.getElementById('loginCard').style.display = 'block';
-        document.getElementById('studioContainer').style.display = 'none';
-        document.getElementById('btnChangeCode').style.display = 'none';
+        await fetchPhotos();
     }
 
     async function fetchPhotos() {
         if (!activeCode) return;
         try {
-            let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`, {
-                headers: { 'ngrok-skip-browser-warning': '69420' }
-            });
+            let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`);
             if (res.ok) {
                 let data = await res.json();
-                let newUrls = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
-                
-                if (newUrls.length !== availablePhotos.length) {
-                    availablePhotos = newUrls;
-                    renderPhotoGrid();
-                    renderA4Canvas();
-                }
+                availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
+                renderPhotoGrid();
+                renderA4Canvas();
             }
-        } catch (e) { console.log("Đang kết nối server..."); }
+        } catch (e) { console.log("Lỗi kết nối tới máy chủ booth!"); }
     }
 
     function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
-        for (let idx = 0; idx < availablePhotos.length; idx++) {
-            let url = availablePhotos[idx];
+        availablePhotos.forEach((url, idx) => {
             let item = document.createElement('div');
             item.className = 'photo-item';
-            
-            item.innerHTML = `<img src="${url}" loading="lazy"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
+            item.innerHTML = `<img src="${url}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
             item.onclick = () => assignToNextSlot(url);
             grid.appendChild(item);
-        }
+        });
     }
 
     function setFrameType(type, event) {
@@ -243,7 +185,6 @@
             ctx.strokeStyle = '#fbe395';
             ctx.lineWidth = 15;
             ctx.strokeRect(80, 80, width - 160, height - 160);
-            
             ctx.fillStyle = '#fbe395';
             ctx.font = 'bold 70px sans-serif';
             ctx.textAlign = 'center';
@@ -302,7 +243,7 @@
                 ctx.fillStyle = '#b3a5b3';
                 ctx.font = '40px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(`+ Chọn ảnh ô ${i+1}`, slot.x + slot.w/2, slot.y + slot.h/2);
+                ctx.fillText(`+ Chọn ảnh ${i+1}`, slot.x + slot.w/2, slot.y + slot.h/2);
             }
             ctx.restore();
         }
