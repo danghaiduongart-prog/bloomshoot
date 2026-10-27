@@ -68,7 +68,7 @@
     <!-- Màn hình 1: Nhập Mã -->
     <div class="login-card" id="loginCard">
         <h1>NHẬP MÃ VÉ</h1>
-        <p>Nhập 6 số mã phiên chụp của bạn để nhận ảnh</p>
+        <p>Nhập mã phiên chụp của bạn để xem kho ảnh</p>
         <input type="text" id="ticketCodeInput" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
         <button class="btn-main" onclick="startStudioSession()">XEM KHO ẢNH</button>
     </div>
@@ -76,7 +76,7 @@
     <!-- Màn hình 2: Studio Chính -->
     <div class="studio-container" id="studioContainer" style="display: none; display: grid; grid-template-columns: 1fr 460px;">
         
-        <!-- Trái: Danh sách ảnh gốc & Tải xuống -->
+        <!-- Trái: Danh sách ảnh gốc -->
         <div class="section-box photos-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color: #fbe395; font-size: 16px;">📸 KHO ẢNH CHỤP GỐC</h3>
@@ -85,7 +85,7 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="fetchPhotosForce()">🔄 Làm mới kho ảnh</button>
+                <button class="btn-sub" onclick="fetchPhotosForce()">🔄 Cập nhật ảnh mới</button>
                 <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
             </div>
             <div class="action-bar" style="margin-top: 8px;">
@@ -126,7 +126,7 @@
     let DEFAULT_SERVER = "https://colt-ellipse-flagman.ngrok-free.dev";
     let serverUrl = localStorage.getItem('bloom_server_url') || DEFAULT_SERVER;
     let activeCode = "";
-    let cachedPhotoData = {}; // Bộ nhớ cache lưu ảnh theo mã vé để không bao giờ phải load lại
+    let cachedPhotoData = {}; // Bộ nhớ cache cục bộ lưu trữ danh sách ảnh theo mã vé
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
 
@@ -153,7 +153,7 @@
         document.getElementById('btnChangeCode').style.display = 'block';
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
-        // Nếu đã từng lưu cache của mã này rồi thì hiện ngay lập tức trong 0.1 giây không cần fetch lại
+        // Nếu mã này đã được lưu trong bộ nhớ cache, hiển thị tức thì trong vòng 0.1 giây
         if (cachedPhotoData[activeCode] && cachedPhotoData[activeCode].length > 0) {
             renderPhotoGrid(cachedPhotoData[activeCode]);
             renderA4Canvas();
@@ -171,7 +171,7 @@
     }
 
     async function fetchPhotosForce() {
-        // Nút làm mới thủ công khi khách vừa chụp xong loạt mới
+        // Nút dùng khi khách vừa chụp thêm loạt ảnh mới muốn ép tải lại
         delete cachedPhotoData[activeCode];
         await fetchPhotos(true);
     }
@@ -179,7 +179,6 @@
     async function fetchPhotos(isRefresh = false) {
         if (!activeCode) return;
         
-        // Kiểm tra cache trong bộ nhớ trước
         if (!isRefresh && cachedPhotoData[activeCode]) {
             renderPhotoGrid(cachedPhotoData[activeCode]);
             renderA4Canvas();
@@ -194,7 +193,6 @@
                 let data = await res.json();
                 let urls = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
                 
-                // Tải trước các blob ảnh để lưu vào bộ nhớ cache
                 let blobUrls = [];
                 for (let url of urls) {
                     let bUrl = await loadBlobUrl(url);
