@@ -95,9 +95,9 @@
             <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">🎨 CHỌN KHUNG GHÉP (A4)</h3>
             
             <div class="frame-select-group">
-                <button class="btn-frame active" onclick="setFrameType('basic_4')">Basic 4 Ảnh</button>
-                <button class="btn-frame" onclick="setFrameType('flower_4')">Hoa Hòe 4 Ảnh</button>
-                <button class="btn-frame" onclick="setFrameType('basic_9')">Grid 9 Ảnh</button>
+                <button class="btn-frame active" onclick="setFrameType('basic_4', event)">Basic 4 Ảnh</button>
+                <button class="btn-frame" onclick="setFrameType('flower_4', event)">Hoa Hòe 4 Ảnh</button>
+                <button class="btn-frame" onclick="setFrameType('basic_9', event)">Grid 9 Ảnh</button>
             </div>
 
             <canvas id="a4Canvas" width="2480" height="3508"></canvas>
@@ -110,7 +110,7 @@
     <div class="modal" id="configModal">
         <div class="modal-body">
             <h3>🌐 Cấu Hình Đường Dẫn Server Booth</h3>
-            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập IP nội bộ máy tiệm (VD: http://192.168.0.71:5001):</p>
+            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập link Ngrok hoặc IP máy tiệm (VD: https://xxxx.ngrok-free.dev):</p>
             <input type="text" id="serverUrlInput">
             <div style="display: flex; gap: 10px;">
                 <button class="btn-sub" onclick="closeConfigModal()">Hủy</button>
@@ -120,12 +120,12 @@
     </div>
 
 <script>
-    let DEFAULT_SERVER = "http://192.168.0.71:5001";
+    let DEFAULT_SERVER = "https://colt-ellipse-flagman.ngrok-free.dev";
     let serverUrl = localStorage.getItem('bloom_server_url') || DEFAULT_SERVER;
     let activeCode = "";
     let availablePhotos = [];
-    let assignedPhotos = {}; // Lưu vị trí ảnh vào khung
-    let currentFrame = "basic_4"; // basic_4, flower_4, basic_9
+    let assignedPhotos = {}; 
+    let currentFrame = "basic_4"; 
     let pollInterval = null;
 
     document.getElementById('serverUrlInput').value = serverUrl;
@@ -190,10 +190,10 @@
         });
     }
 
-    function setFrameType(type) {
+    function setFrameType(type, event) {
         currentFrame = type;
         document.querySelectorAll('.btn-frame').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        if(event && event.target) event.target.classList.add('active');
         assignedPhotos = {};
         renderA4Canvas();
     }
@@ -217,17 +217,14 @@
         renderA4Canvas();
     }
 
-    // Vẽ Khung A4 Chuẩn 300 DPI (2480 x 3508 px)
     async function renderA4Canvas() {
         let canvas = document.getElementById('a4Canvas');
         let ctx = canvas.getContext('2d');
         let width = 2480, height = 3508;
 
-        // Background theo loại khung
         ctx.fillStyle = (currentFrame === 'flower_4') ? '#2a0520' : '#140312';
         ctx.fillRect(0, 0, width, height);
 
-        // Vẽ hoạ tiết khung hoa hòe giả lập hoặc viền basic
         if (currentFrame === 'flower_4') {
             ctx.strokeStyle = '#fbe395';
             ctx.lineWidth = 15;
@@ -244,7 +241,6 @@
             ctx.fillText('BLOOM SHOOT PHOTOBOOTH', width / 2, 180);
         }
 
-        // Định nghĩa ô (Slots) cho từng loại khung A4
         let slots = [];
         if (currentFrame === 'basic_9') {
             let startX = 200, startY = 350, sW = 650, sH = 900, gapX = 80, gapY = 80;
@@ -254,14 +250,12 @@
                 }
             }
         } else {
-            // Khung 4 ảnh dọc/ngang full A4
             let startX = 300, startY = 300, sW = 1880, sH = 1300, gapY = 100;
             if (currentFrame === 'flower_4') { startY = 350; sH = 1250; }
             slots.push({x: startX, y: startY, w: sW, h: sH});
             slots.push({x: startX, y: startY + sH + gapY, w: sW, h: sH});
         }
 
-        // Vẽ ảnh vào từng slot
         for (let i = 0; i < slots.length; i++) {
             let slot = slots[i];
             ctx.save();
@@ -279,7 +273,7 @@
                 let img = await loadImage(assignedPhotos[i]);
                 if (img) {
                     ctx.translate(slot.x + slot.w, slot.y);
-                    ctx.scale(-1, 1); // Lật gương chống ngược
+                    ctx.scale(-1, 1);
                     let imgRatio = img.width / img.height;
                     let slotRatio = slot.w / slot.h;
                     let dW, dH, oX = 0, oY = 0;
@@ -299,7 +293,6 @@
             ctx.restore();
         }
 
-        // Footer Mã vé
         ctx.fillStyle = '#fbe395';
         ctx.font = 'bold 50px sans-serif';
         ctx.textAlign = 'center';
