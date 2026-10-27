@@ -85,7 +85,7 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="fetchPhotosForce()">🔄 Cập nhật ảnh mới</button>
+                <button class="btn-sub" onclick="fetchPhotos()">🔄 Cập nhật ảnh mới</button>
                 <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
             </div>
             <div class="action-bar" style="margin-top: 8px;">
@@ -126,9 +126,10 @@
     let DEFAULT_SERVER = "https://colt-ellipse-flagman.ngrok-free.dev";
     let serverUrl = localStorage.getItem('bloom_server_url') || DEFAULT_SERVER;
     let activeCode = "";
-    let cachedPhotoData = {}; // Bộ nhớ cache cục bộ lưu trữ danh sách ảnh theo mã vé
+    let availablePhotos = [];
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
+    let pollInterval = null;
 
     document.getElementById('serverUrlInput').value = serverUrl;
 
@@ -140,7 +141,7 @@
         serverUrl = val;
         localStorage.setItem('bloom_server_url', serverUrl);
         closeConfigModal();
-        if(activeCode) fetchPhotos(true);
+        if(activeCode) fetchPhotos();
     }
 
     function startStudioSession() {
@@ -153,82 +154,54 @@
         document.getElementById('btnChangeCode').style.display = 'block';
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
-        // Nếu mã này đã được lưu trong bộ nhớ cache, hiển thị tức thì trong vòng 0.1 giây
-        if (cachedPhotoData[activeCode] && cachedPhotoData[activeCode].length > 0) {
-            renderPhotoGrid(cachedPhotoData[activeCode]);
-            renderA4Canvas();
-        } else {
-            fetchPhotos(false);
-        }
+        availablePhotos = [];
+        fetchPhotos();
+
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(fetchPhotos, 4000);
     }
 
     function resetToLogin() {
+        if (pollInterval) clearInterval(pollInterval);
         activeCode = "";
         assignedPhotos = {};
+        availablePhotos = [];
         document.getElementById('loginCard').style.display = 'block';
         document.getElementById('studioContainer').style.display = 'none';
         document.getElementById('btnChangeCode').style.display = 'none';
     }
 
-    async function fetchPhotosForce() {
-        // Nút dùng khi khách vừa chụp thêm loạt ảnh mới muốn ép tải lại
-        delete cachedPhotoData[activeCode];
-        await fetchPhotos(true);
-    }
-
-    async function fetchPhotos(isRefresh = false) {
+    async function fetchPhotos() {
         if (!activeCode) return;
-        
-        if (!isRefresh && cachedPhotoData[activeCode]) {
-            renderPhotoGrid(cachedPhotoData[activeCode]);
-            renderA4Canvas();
-            return;
-        }
-
         try {
             let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`, {
                 headers: { 'ngrok-skip-browser-warning': '69420' }
             });
             if (res.ok) {
                 let data = await res.json();
-                let urls = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
+                let newUrls = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
                 
-                let blobUrls = [];
-                for (let url of urls) {
-                    let bUrl = await loadBlobUrl(url);
-                    blobUrls.push(bUrl);
+                if (newUrls.length !== availablePhotos.length) {
+                    availablePhotos = newUrls;
+                    renderPhotoGrid();
+                    renderA4Canvas();
                 }
-                
-                cachedPhotoData[activeCode] = blobUrls;
-                renderPhotoGrid(blobUrls);
-                renderA4Canvas();
             }
         } catch (e) { console.log("Đang kết nối server..."); }
     }
 
-    async function renderPhotoGrid(photoList) {
+    function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
-        for (let idx = 0; idx < photoList.length; idx++) {
-            let imgBlobUrl = photoList[idx];
+        for (let idx = 0; idx < availablePhotos.length; idx++) {
+            let url = availablePhotos[idx];
             let item = document.createElement('div');
             item.className = 'photo-item';
             
-            item.innerHTML = `<img src="${imgBlobUrl}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
-            item.onclick = () => assignToNextSlot(imgBlobUrl);
+            item.innerHTML = `<img src="${url}" loading="lazy"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
+            item.onclick = () => assignToNextSlot(url);
             grid.appendChild(item);
         }
-    }
-
-    async function loadBlobUrl(url) {
-        try {
-            let res = await fetch(url, { headers: { 'ngrok-skip-browser-warning': '69420' } });
-            if (res.ok) {
-                let blob = await res.blob();
-                return URL.createObjectURL(blob);
-            }
-        } catch(e) {}
-        return url;
     }
 
     function setFrameType(type, event) {
@@ -240,20 +213,18 @@
     }
 
     function autoFillFrames() {
-        let photoList = cachedPhotoData[activeCode] || [];
         let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
-        let gridImgs = document.querySelectorAll('.photo-item img');
-        photoList.forEach((url, i) => {
-            if (i < maxSlots && gridImgs[i]) assignedPhotos[i] = gridImgs[i].src;
+        availablePhotos.forEach((url, i) => {
+            if (i < maxSlots) assignedPhotos[i] = url;
         });
         renderA4Canvas();
     }
 
-    function assignToNextSlot(blobUrl) {
+    function assignToNextSlot(url) {
         let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
         for (let i = 0; i < maxSlots; i++) {
             if (!assignedPhotos[i]) {
-                assignedPhotos[i] = blobUrl;
+                assignedPhotos[i] = url;
                 break;
             }
         }
@@ -353,8 +324,7 @@
     }
 
     function downloadAllPhotos() {
-        let photoList = cachedPhotoData[activeCode] || [];
-        photoList.forEach((url, i) => {
+        availablePhotos.forEach((url, i) => {
             let a = document.createElement('a');
             a.href = url;
             a.download = `BLOOM_${activeCode}_${i+1}.jpg`;
