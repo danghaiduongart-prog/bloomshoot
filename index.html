@@ -85,11 +85,8 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="fetchPhotos()">🔄 Làm mới kho ảnh</button>
                 <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
-            </div>
-            <div class="action-bar" style="margin-top: 8px;">
-                <button class="btn-sub" style="width: 100%; background: #2a0826;" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
+                <button class="btn-sub" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh</button>
             </div>
         </div>
 
@@ -129,6 +126,8 @@
     let availablePhotos = [];
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
+    let pollInterval = null;
+    let lastPhotoCount = 0;
 
     document.getElementById('serverUrlInput').value = serverUrl;
 
@@ -140,7 +139,7 @@
         serverUrl = val;
         localStorage.setItem('bloom_server_url', serverUrl);
         closeConfigModal();
-        if(activeCode) fetchPhotos();
+        if(activeCode) fetchPhotos(true);
     }
 
     function startStudioSession() {
@@ -153,18 +152,25 @@
         document.getElementById('btnChangeCode').style.display = 'block';
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
-        fetchPhotos();
+        lastPhotoCount = 0;
+        fetchPhotos(true);
+        
+        if (pollInterval) clearInterval(pollInterval);
+        // Tự động quét ngầm mỗi 3 giây, chỉ render lại khi có số lượng ảnh thay đổi (khách chụp thêm)
+        pollInterval = setInterval(() => fetchPhotos(false), 3000);
     }
 
     function resetToLogin() {
+        if (pollInterval) clearInterval(pollInterval);
         activeCode = "";
         assignedPhotos = {};
+        lastPhotoCount = 0;
         document.getElementById('loginCard').style.display = 'block';
         document.getElementById('studioContainer').style.display = 'none';
         document.getElementById('btnChangeCode').style.display = 'none';
     }
 
-    async function fetchPhotos() {
+    async function fetchPhotos(forceRender = false) {
         if (!activeCode) return;
         try {
             let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`, {
@@ -172,9 +178,15 @@
             });
             if (res.ok) {
                 let data = await res.json();
-                availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
-                await renderPhotoGrid();
-                renderA4Canvas();
+                let newPhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
+                
+                // Chỉ render lại giao diện khi số lượng ảnh thay đổi (khách vừa chụp thêm ảnh mới)
+                if (forceRender || newPhotos.length !== availablePhotos.length) {
+                    availablePhotos = newPhotos;
+                    lastPhotoCount = availablePhotos.length;
+                    await renderPhotoGrid();
+                    renderA4Canvas();
+                }
             }
         } catch (e) { console.log("Đang kết nối server..."); }
     }
