@@ -110,7 +110,7 @@
     <div class="modal" id="configModal">
         <div class="modal-body">
             <h3>🌐 Cấu Hình Đường Dẫn Server Booth</h3>
-            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập link Ngrok hoặc IP máy tiệm (VD: https://xxxx.ngrok-free.dev):</p>
+            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập link Ngrok (VD: https://xxxx.ngrok-free.dev):</p>
             <input type="text" id="serverUrlInput">
             <div style="display: flex; gap: 10px;">
                 <button class="btn-sub" onclick="closeConfigModal()">Hủy</button>
@@ -153,7 +153,7 @@
 
         fetchPhotos();
         if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(fetchPhotos, 2000);
+        pollInterval = setInterval(fetchPhotos, 5000); // Tăng lên 5 giây để chống nghẽn Ngrok Free
     }
 
     function resetToLogin() {
@@ -168,7 +168,9 @@
     async function fetchPhotos() {
         if (!activeCode) return;
         try {
-            let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`);
+            let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`, {
+                headers: { 'ngrok-skip-browser-warning': '69420' }
+            });
             if (res.ok) {
                 let data = await res.json();
                 availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
@@ -178,16 +180,31 @@
         } catch (e) { console.log("Đang kết nối server..."); }
     }
 
-    function renderPhotoGrid() {
+    async function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
-        availablePhotos.forEach((url, idx) => {
+        for (let idx = 0; idx < availablePhotos.length; idx++) {
+            let url = availablePhotos[idx];
             let item = document.createElement('div');
             item.className = 'photo-item';
-            item.innerHTML = `<img src="${url}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
-            item.onclick = () => assignToNextSlot(url);
+            
+            let imgBlobUrl = await loadBlobUrl(url);
+            
+            item.innerHTML = `<img src="${imgBlobUrl}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
+            item.onclick = () => assignToNextSlot(imgBlobUrl);
             grid.appendChild(item);
-        });
+        }
+    }
+
+    async function loadBlobUrl(url) {
+        try {
+            let res = await fetch(url, { headers: { 'ngrok-skip-browser-warning': '69420' } });
+            if (res.ok) {
+                let blob = await res.blob();
+                return URL.createObjectURL(blob);
+            }
+        } catch(e) {}
+        return url;
     }
 
     function setFrameType(type, event) {
@@ -200,17 +217,18 @@
 
     function autoFillFrames() {
         let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
+        let gridImgs = document.querySelectorAll('.photo-item img');
         availablePhotos.forEach((url, i) => {
-            if (i < maxSlots) assignedPhotos[i] = url;
+            if (i < maxSlots && gridImgs[i]) assignedPhotos[i] = gridImgs[i].src;
         });
         renderA4Canvas();
     }
 
-    function assignToNextSlot(url) {
+    function assignToNextSlot(blobUrl) {
         let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
         for (let i = 0; i < maxSlots; i++) {
             if (!assignedPhotos[i]) {
-                assignedPhotos[i] = url;
+                assignedPhotos[i] = blobUrl;
                 break;
             }
         }
