@@ -85,8 +85,11 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
+                <button class="btn-sub" onclick="fetchPhotosForce()">🔄 Làm mới kho ảnh</button>
                 <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
-                <button class="btn-sub" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh</button>
+            </div>
+            <div class="action-bar" style="margin-top: 8px;">
+                <button class="btn-sub" style="width: 100%; background: #2a0826;" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
             </div>
         </div>
 
@@ -123,11 +126,9 @@
     let DEFAULT_SERVER = "https://colt-ellipse-flagman.ngrok-free.dev";
     let serverUrl = localStorage.getItem('bloom_server_url') || DEFAULT_SERVER;
     let activeCode = "";
-    let availablePhotos = [];
+    let cachedPhotoData = {}; // Bộ nhớ cache lưu ảnh theo mã vé để không bao giờ phải load lại
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
-    let pollInterval = null;
-    let lastPhotoCount = 0;
 
     document.getElementById('serverUrlInput').value = serverUrl;
 
@@ -152,54 +153,68 @@
         document.getElementById('btnChangeCode').style.display = 'block';
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
-        lastPhotoCount = 0;
-        fetchPhotos(true);
-        
-        if (pollInterval) clearInterval(pollInterval);
-        // Tự động quét ngầm mỗi 3 giây, chỉ render lại khi có số lượng ảnh thay đổi (khách chụp thêm)
-        pollInterval = setInterval(() => fetchPhotos(false), 3000);
+        // Nếu đã từng lưu cache của mã này rồi thì hiện ngay lập tức trong 0.1 giây không cần fetch lại
+        if (cachedPhotoData[activeCode] && cachedPhotoData[activeCode].length > 0) {
+            renderPhotoGrid(cachedPhotoData[activeCode]);
+            renderA4Canvas();
+        } else {
+            fetchPhotos(false);
+        }
     }
 
     function resetToLogin() {
-        if (pollInterval) clearInterval(pollInterval);
         activeCode = "";
         assignedPhotos = {};
-        lastPhotoCount = 0;
         document.getElementById('loginCard').style.display = 'block';
         document.getElementById('studioContainer').style.display = 'none';
         document.getElementById('btnChangeCode').style.display = 'none';
     }
 
-    async function fetchPhotos(forceRender = false) {
+    async function fetchPhotosForce() {
+        // Nút làm mới thủ công khi khách vừa chụp xong loạt mới
+        delete cachedPhotoData[activeCode];
+        await fetchPhotos(true);
+    }
+
+    async function fetchPhotos(isRefresh = false) {
         if (!activeCode) return;
+        
+        // Kiểm tra cache trong bộ nhớ trước
+        if (!isRefresh && cachedPhotoData[activeCode]) {
+            renderPhotoGrid(cachedPhotoData[activeCode]);
+            renderA4Canvas();
+            return;
+        }
+
         try {
             let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`, {
                 headers: { 'ngrok-skip-browser-warning': '69420' }
             });
             if (res.ok) {
                 let data = await res.json();
-                let newPhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
+                let urls = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
                 
-                // Chỉ render lại giao diện khi số lượng ảnh thay đổi (khách vừa chụp thêm ảnh mới)
-                if (forceRender || newPhotos.length !== availablePhotos.length) {
-                    availablePhotos = newPhotos;
-                    lastPhotoCount = availablePhotos.length;
-                    await renderPhotoGrid();
-                    renderA4Canvas();
+                // Tải trước các blob ảnh để lưu vào bộ nhớ cache
+                let blobUrls = [];
+                for (let url of urls) {
+                    let bUrl = await loadBlobUrl(url);
+                    blobUrls.push(bUrl);
                 }
+                
+                cachedPhotoData[activeCode] = blobUrls;
+                renderPhotoGrid(blobUrls);
+                renderA4Canvas();
             }
         } catch (e) { console.log("Đang kết nối server..."); }
     }
 
-    async function renderPhotoGrid() {
+    async function renderPhotoGrid(photoList) {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
-        for (let idx = 0; idx < availablePhotos.length; idx++) {
-            let url = availablePhotos[idx];
+        for (let idx = 0; idx < photoList.length; idx++) {
+            let imgBlobUrl = photoList[idx];
             let item = document.createElement('div');
             item.className = 'photo-item';
-            
-            let imgBlobUrl = await loadBlobUrl(url);
             
             item.innerHTML = `<img src="${imgBlobUrl}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
             item.onclick = () => assignToNextSlot(imgBlobUrl);
@@ -227,9 +242,10 @@
     }
 
     function autoFillFrames() {
+        let photoList = cachedPhotoData[activeCode] || [];
         let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
         let gridImgs = document.querySelectorAll('.photo-item img');
-        availablePhotos.forEach((url, i) => {
+        photoList.forEach((url, i) => {
             if (i < maxSlots && gridImgs[i]) assignedPhotos[i] = gridImgs[i].src;
         });
         renderA4Canvas();
@@ -339,7 +355,8 @@
     }
 
     function downloadAllPhotos() {
-        availablePhotos.forEach((url, i) => {
+        let photoList = cachedPhotoData[activeCode] || [];
+        photoList.forEach((url, i) => {
             let a = document.createElement('a');
             a.href = url;
             a.download = `BLOOM_${activeCode}_${i+1}.jpg`;
