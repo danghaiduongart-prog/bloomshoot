@@ -85,8 +85,11 @@
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
-                <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự động điền vào khung</button>
+                <button class="btn-sub" onclick="fetchPhotos()">🔄 Làm mới kho ảnh</button>
+                <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
+            </div>
+            <div class="action-bar" style="margin-top: 8px;">
+                <button class="btn-sub" style="width: 100%; background: #2a0826;" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
             </div>
         </div>
 
@@ -126,7 +129,6 @@
     let availablePhotos = [];
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
-    let pollInterval = null;
 
     document.getElementById('serverUrlInput').value = serverUrl;
 
@@ -152,12 +154,9 @@
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
         fetchPhotos();
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(fetchPhotos, 5000); // Tăng lên 5 giây để chống nghẽn Ngrok Free
     }
 
     function resetToLogin() {
-        if (pollInterval) clearInterval(pollInterval);
         activeCode = "";
         assignedPhotos = {};
         document.getElementById('loginCard').style.display = 'block';
@@ -174,7 +173,7 @@
             if (res.ok) {
                 let data = await res.json();
                 availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
-                renderPhotoGrid();
+                await renderPhotoGrid();
                 renderA4Canvas();
             }
         } catch (e) { console.log("Đang kết nối server..."); }
