@@ -11,6 +11,7 @@
         header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a0826; }
         .brand { font-size: 20px; font-weight: bold; color: #fbe395; letter-spacing: 2px; }
         .brand span { display: block; font-size: 10px; color: #b3a5b3; letter-spacing: 1px; margin-top: 2px; }
+        .btn-group-header { display: flex; gap: 8px; }
         .btn-icon { background: #1a0518; border: 1px solid #2a0826; color: #fbe395; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
         .btn-icon:hover { background: #2a0826; }
 
@@ -54,8 +55,9 @@
             BLOOM SHOOT
             <span>VŨNG TÀU PHOTOBOTH</span>
         </div>
-        <div>
-            <button class="btn-icon" id="btnChangeCode" style="display: none;" onclick="location.reload()">⚙️ Đổi mã vé</button>
+        <div class="btn-group-header">
+            <button class="btn-icon" id="btnChangeCode" style="display: none;" onclick="location.reload()">⚙️ Đổi mã</button>
+            <button class="btn-icon" onclick="document.getElementById('configModal').style.display='flex'">🌐 Đổi IP LAN</button>
         </div>
     </header>
 
@@ -100,9 +102,33 @@
         </div>
     </div>
 
+    <!-- Modal Cấu hình IP LAN -->
+    <div class="modal" id="configModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100;">
+        <div class="modal-body" style="background: #1a0518; border: 1px solid #2a0826; padding: 25px; border-radius: 16px; width: 90%; max-width: 450px;">
+            <h3 style="color: #fbe395; margin-bottom: 15px;">🌐 Cấu Hình IP Máy Booth (LAN)</h3>
+            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập IP máy tính chạy Python ở quán (kèm cổng 5001):</p>
+            <input type="text" id="serverUrlInput" placeholder="http://192.168.1.50:5001" style="width: 100%; padding: 12px; background: #0b020a; border: 1px solid #2a0826; color: white; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-sub" onclick="document.getElementById('configModal').style.display='none'">Hủy</button>
+                <button class="btn-main" onclick="saveServerConfig()">Lưu IP</button>
+            </div>
+        </div>
+    </div>
+
 <script>
-    // Link server Python ở quán của anh (Nếu đưa lên Vercel chạy Cloud hoặc chạy LAN thì trỏ về đây)
-    let serverUrl = "http://localhost:5001"; // Hoặc link server Python public của anh
+    let serverUrl = localStorage.getItem('bloom_lan_ip') || "http://localhost:5001";
+    document.getElementById('serverUrlInput').value = serverUrl;
+
+    function saveServerConfig() {
+        let val = document.getElementById('serverUrlInput').value.trim();
+        if (val.endsWith('/')) val = val.slice(0, -1);
+        serverUrl = val;
+        localStorage.setItem('bloom_lan_ip', serverUrl);
+        document.getElementById('configModal').style.display = 'none';
+        if(activeCode) fetchPhotos();
+        alert("Đã lưu IP thành công!");
+    }
+
     let activeCode = "";
     let availablePhotos = [];
     let assignedPhotos = {}; 
