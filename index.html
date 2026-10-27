@@ -145,6 +145,8 @@
         document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
 
         await fetchPhotos();
+        // Tự động đồng bộ liên tục mỗi 3 giây để cập nhật ảnh mới từ mây
+        setInterval(fetchPhotos, 3000);
     }
 
     async function fetchPhotos() {
@@ -153,11 +155,12 @@
             let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`);
             if (res.ok) {
                 let data = await res.json();
+                // Tự động phân loại: Nếu là link mây Cloudinary thì giữ nguyên, nếu là đường dẫn nội bộ thì ghép với serverUrl
                 availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
                 renderPhotoGrid();
                 renderA4Canvas();
             }
-        } catch (e) { console.log("Lỗi kết nối tới máy chủ booth!"); }
+        } catch (e) { console.log("Đang kết nối tới máy chủ..."); }
     }
 
     function renderPhotoGrid() {
