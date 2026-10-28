@@ -55,14 +55,6 @@
                 <button class="frame-btn" onclick="changeFrame('green_check', event)">🏁 Xanh Caro</button>
                 <button class="frame-btn" onclick="changeFrame('lilac_butterfly', event)">🦋 Tím Bướm</button>
             </div>
-            
-            <!-- Nút bấm upload ảnh khung PNG trực tiếp trên web khách -->
-            <div style="margin-top: 10px;">
-                <button onclick="document.getElementById('frameOverlayInput').click()" style="width: 100%; background: #2a0826; border: 1px dashed #d4af37; color: #fbe395; padding: 8px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold;">
-                    🖼️ Tải/Cập Nhật Ảnh Khung PNG Cho Mẫu Này
-                </button>
-                <input type="file" id="frameOverlayInput" accept="image/png" style="display:none;" onchange="uploadCustomFrameOverlay(this)">
-            </div>
         </div>
 
         <div class="section-box">
@@ -99,7 +91,16 @@
     let canvas, ctx;
     let frameOverlayImg = null;
 
-    // Tọa độ các ô mặc định cho từng mẫu khung
+    // Trỏ trực tiếp tới 4 file ảnh đã up lên kho GitHub của dự án
+    const frameImageFiles = {
+        'purple_dream': 'frame (4).png',
+        'pink_ribbon': 'frame (2).png',
+        'blue_star': 'frame.png',
+        'retro_sun': 'frame (3).png',
+        'green_check': '',
+        'lilac_butterfly': ''
+    };
+
     const defaultSlots = {
         'purple_dream': [
             { "x": 180,  "y": 350,  "w": 1250, "h": 750  },
@@ -113,7 +114,15 @@
             { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
             { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
         ],
-        'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
+        'blue_star': [
+            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
+            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
+        ], 
+        'retro_sun': [
+            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
+            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
+        ], 
+        'green_check': [], 'lilac_butterfly': []
     };
 
     function checkCode() {
@@ -157,8 +166,7 @@
     }
 
     function getCurrentSlots() {
-        let savedData = JSON.parse(localStorage.getItem('BLOOM_ALL_FRAMES')) || {};
-        let slots = savedData[currentFrameType] || defaultSlots[currentFrameType] || [];
+        let slots = defaultSlots[currentFrameType] || [];
         if(slots.length === 0) {
             slots = defaultSlots['purple_dream'];
         }
@@ -209,9 +217,9 @@
 
     function loadFrameOverlay() {
         if(!ctx) return;
-        let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
+        let fileName = frameImageFiles[currentFrameType];
         
-        if(savedImages[currentFrameType]) {
+        if(fileName) {
             let fImg = new Image();
             fImg.onload = function() {
                 canvas.width = fImg.width;
@@ -219,7 +227,13 @@
                 frameOverlayImg = fImg;
                 redrawCanvas();
             };
-            fImg.src = savedImages[currentFrameType];
+            fImg.onerror = function() {
+                canvas.width = 2480;
+                canvas.height = 3508;
+                frameOverlayImg = null;
+                redrawCanvas();
+            };
+            fImg.src = fileName;
         } else {
             canvas.width = 2480;
             canvas.height = 3508;
@@ -228,23 +242,7 @@
         }
     }
 
-    function uploadCustomFrameOverlay(input) {
-        if (input.files && input.files[0]) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let base64 = e.target.result;
-                let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
-                savedImages[currentFrameType] = base64;
-                localStorage.setItem('BLOOM_ALL_IMAGES', JSON.stringify(savedImages));
-                loadFrameOverlay();
-                alert("Đã cập nhật ảnh khung PNG thành công trên web!");
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
     function assignImageToSlot(img) {
-        let currentSlots = getCurrentSlots();
         slotAssignments[activeSlot] = { img: img, scale: 1.0, rotation: 0, offsetX: 0, offsetY: 0 };
         redrawCanvas();
     }
