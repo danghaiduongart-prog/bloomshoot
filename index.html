@@ -6,44 +6,52 @@
     <title>BLOOM SHOOT - Photobooth</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: manipulation; }
-        body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        body { background: #0b020a; color: #ffffff; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
         
-        #settingsBtn { position: fixed; top: 10px; right: 10px; background: rgba(26,5,24,0.8); border: 1px solid #d4af37; color: #fbe395; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; }
+        #settingsBtn { position: fixed; top: 10px; right: 10px; background: rgba(26,5,24,0.8); border: 1px solid #d4af37; color: #fbe395; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; }
         
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
-        .main-app { display: none; width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
-        .section-box { background: #1a0518; padding: 15px; border-radius: 16px; border: 1px solid #2a0826; margin-bottom: 15px; }
-        .frame-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-        .frame-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 10px 4px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
+        /* GIAO DIỆN CHÍNH GỌN TRONG 1 MÀN HÌNH ĐIỆN THOẠI KHÔNG CẦN CUỘN */
+        .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; display: none; flex-direction: column; padding: 10px; padding-bottom: 70px; }
+        
+        /* Thanh chọn khung thu gọn ở trên */
+        .top-frame-box { background: #1a0518; padding: 8px 12px; border-radius: 12px; border: 1px solid #2a0826; margin-bottom: 8px; flex-shrink: 0; }
+        .frame-grid { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+        .frame-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
         .frame-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        .upload-zone { border: 2px dashed #d4af37; padding: 12px; text-align: center; border-radius: 10px; background: #0b020a; cursor: pointer; }
-        .photo-grid { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
-        .photo-thumb { width: 70px; height: 90px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
+        /* Khung hiển thị canvas phóng to ở giữa */
+        .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 8px; min-height: 0; }
+        canvas { max-width: 100%; max-height: 100%; display: block; touch-action: none; object-fit: contain; }
+        
+        /* Thanh công cụ chỉnh sửa nhỏ gọn */
+        .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; flex-shrink: 0; }
+        .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 6px 2px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
+        /* THANH KHO ẢNH NẰM NGAY DƯỚI GIỐNG NHƯ TRONG VIDEO */
+        .bottom-photo-bar { background: #1a0518; padding: 8px 10px; border-radius: 12px; border: 1px solid #2a0826; display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-bottom: 8px; }
+        .upload-btn-mini { background: #0b020a; border: 2px dashed #d4af37; color: #fbe395; width: 55px; height: 70px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+        .photo-grid { display: flex; gap: 6px; overflow-x: auto; flex: 1; padding: 2px 0; }
+        .photo-thumb { width: 55px; height: 70px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .canvas-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; position: relative; display: flex; justify-content: center; align-items: center; }
-        canvas { width: 100%; height: auto; display: block; touch-action: none; object-fit: contain; }
-        
-        .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
-        .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px 2px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
-
-        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.95); padding: 12px; display: flex; gap: 10px; border-top: 1px solid #2a0826; z-index: 50; }
-        .btn-action { flex: 1; padding: 14px; font-size: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; text-align: center; }
+        /* Thanh điều hướng dưới cùng */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.95); padding: 10px; display: flex; gap: 10px; border-top: 1px solid #2a0826; z-index: 50; }
+        .btn-action { flex: 1; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; text-align: center; }
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
 
-        /* MODAL XÁC NHẬN IN & MÃ IN (ĐÚNG CHUẨN VIDEO) */
+        /* MODAL XÁC NHẬN IN & CẤP MÃ IN */
         #confirmModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,2,10,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-card { background: #1a0518; border: 2px solid #d4af37; border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; text-align: center; }
         .modal-card h3 { color: #fbe395; margin-bottom: 15px; font-size: 18px; }
         .modal-card p { font-size: 13px; color: #b3a5b3; margin-bottom: 20px; line-height: 1.5; }
         .print-code-box { background: #0b020a; border: 2px dashed #d4af37; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 32px; font-weight: bold; color: #fbe395; letter-spacing: 4px; }
 
-        #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; }
+        #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; height: 100vh; overflow-y: auto; }
         .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
         .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .admin-canvas-box canvas { width: 100%; max-width: 700px; height: auto; cursor: crosshair; object-fit: contain; border: 1px solid #2a0826; }
@@ -57,7 +65,7 @@
 
     <button id="settingsBtn" onclick="openAdmin()">⚙️</button>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP (SESSION) -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP -->
     <div id="loginScreen">
         <div class="login-card">
             <h2 style="color:#fbe395">BLOOM SHOOT</h2>
@@ -66,10 +74,10 @@
         </div>
     </div>
 
-    <!-- GIAO DIỆN CHÍNH CỦA KHÁCH TRÊN ĐIỆN THOẠI -->
-    <div class="main-app" id="mainApp">
-        <div class="section-box">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">1. Chọn Mẫu Khung A4:</label>
+    <!-- GIAO DIỆN KHÁCH TRÊN ĐIỆN THOẠI (GỌN GÀNG, KHÔNG CUỘN) -->
+    <div class="main-app" id="mainApp" style="display: none;">
+        <!-- 1. Thanh chọn khung -->
+        <div class="top-frame-box">
             <div class="frame-grid">
                 <button class="frame-btn active" onclick="changeFrame('purple_dream', event)">🔮 Tím Mộng Mơ</button>
                 <button class="frame-btn" onclick="changeFrame('pink_ribbon', event)">🎀 Hồng Nơ</button>
@@ -80,51 +88,53 @@
             </div>
         </div>
 
-        <div class="section-box">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Từ Điện Thoại:</label>
-            <div class="upload-zone" onclick="document.getElementById('fileInput').click()" style="margin-top:5px;">
-                <span style="font-size: 12px; color: #fbe395;">📁 + Bấm chọn ảnh (Meitu, Xingtutu...)</span>
-                <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
-            </div>
-            <div class="photo-grid" id="photoGrid"></div>
+        <!-- 2. Khung ảnh canvas hiển thị lớn ở giữa -->
+        <div class="canvas-container">
+            <canvas id="a4Canvas" width="2480" height="3508"></canvas>
         </div>
 
-        <div class="section-box" style="text-align:center;">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;" id="activeSlotLabel">👇 Chạm vào Ô bất kỳ trên khung để chọn:</label>
-            <div class="canvas-container">
-                <canvas id="a4Canvas" width="2480" height="3508"></canvas>
+        <!-- 3. Công cụ chỉnh sửa -->
+        <div class="edit-tools">
+            <button class="btn-tool" onclick="adjustZoom(-0.1)">🔍 Thu (-)</button>
+            <button class="btn-tool" onclick="adjustZoom(0.1)">🔍 Phóng (+)</button>
+            <button class="btn-tool" onclick="rotateImage()">🔄 Xoay</button>
+            <button class="btn-tool" onclick="clearActiveSlot()" style="color:#ff6b81;">❌ Xóa Ô</button>
+        </div>
+
+        <!-- 4. Thanh kho ảnh nằm ngay dưới giống video -->
+        <div class="bottom-photo-bar">
+            <div class="upload-btn-mini" onclick="document.getElementById('fileInput').click()">
+                <span>📁</span>
+                <span style="font-size: 9px; margin-top:2px;">Thêm</span>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
             </div>
-            <div class="edit-tools">
-                <button class="btn-tool" onclick="adjustZoom(-0.1)">🔍 Thu (-)</button>
-                <button class="btn-tool" onclick="adjustZoom(0.1)">🔍 Phóng (+)</button>
-                <button class="btn-tool" onclick="rotateImage()">🔄 Xoay</button>
-                <button class="btn-tool" onclick="clearActiveSlot()" style="color:#ff6b81;">❌ Xóa Ô</button>
+            <div class="photo-grid" id="photoGrid">
+                <span style="font-size:11px; color:#b3a5b3; line-height:70px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>
             </div>
-            <p style="font-size:11px; color:#b3a5b3; margin-top:6px;">💡 Chạm trực tiếp vào ô trên khung $\rightarrow$ Bấm ảnh ở kho phía trên để điền vào ô đó.</p>
         </div>
     </div>
 
     <!-- THANH ĐIỀU HƯỚNG DƯỚI CÙNG -->
     <div class="bottom-bar" id="bottomBar" style="display:none;">
-        <button class="btn-action btn-download" onclick="downloadImage()">📥 TẢI ẢNH VỀ</button>
+        <button class="btn-action btn-download" onclick="downloadImage()">📥 TẢI ẢNH</button>
         <button class="btn-action btn-print" onclick="showConfirmModal()">✨ HOÀN THÀNH & IN</button>
     </div>
 
-    <!-- MODAL XÁC NHẬN IN & CẤP MÃ IN (CHUẨN VIDEO RED BUTTON) -->
+    <!-- MODAL XÁC NHẬN IN & MÃ IN -->
     <div id="confirmModal">
         <div class="modal-card" id="modalStep1">
             <h3>XÁC NHẬN IN ẢNH?</h3>
-            <p>Vui lòng kiểm tra kỹ bố cục ảnh trong khung trước khi xác nhận. Sau khi xác nhận, hệ thống sẽ cấp mã in để đưa cho nhân viên[cite: 6].</p>
+            <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy[cite: 6].</p>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
                 <button class="btn-action btn-print" onclick="generatePrintCode()">XÁC NHẬN</button>
             </div>
         </div>
         <div class="modal-card" id="modalStep2" style="display:none;">
-            <h3>🎉 ĐÃ TẠO MÃ IN THÀNH CÔNG!</h3>
-            <p>Đọc mã in này cho nhân viên tại quầy và chờ lấy ảnh trong giây lát nhé[cite: 6]!</p>
+            <h3>🎉 ĐÃ CẤP MÃ IN THÀNH CÔNG!</h3>
+            <p>Đọc mã này cho nhân viên tại quầy để lấy ảnh nhé[cite: 6]!</p>
             <div class="print-code-box" id="displayPrintCode">XDG</div>
-            <button class="btn-action btn-print" onclick="location.reload()" style="width:100%;">HOÀN TẤT & TẠO PHIÊN MỚI</button>
+            <button class="btn-action btn-print" onclick="location.reload()" style="width:100%;">TẠO PHIÊN MỚI</button>
         </div>
     </div>
 
@@ -214,7 +224,7 @@
 
     function checkCode() {
         document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('mainApp').style.display = 'flex';
         document.getElementById('bottomBar').style.display = 'flex';
         initCanvas();
     }
@@ -243,6 +253,10 @@
     function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
+        if(uploadedImages.length === 0) {
+            grid.innerHTML = `<span style="font-size:11px; color:#b3a5b3; line-height:70px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>`;
+            return;
+        }
         uploadedImages.forEach((img, idx) => {
             let div = document.createElement('div');
             div.className = 'photo-thumb';
@@ -276,7 +290,6 @@
             currentSlots.forEach((slot, idx) => {
                 if(touchX >= slot.x && touchX <= slot.x + slot.w && touchY >= slot.y && touchY <= slot.y + slot.h) {
                     activeSlot = idx;
-                    document.getElementById('activeSlotLabel').innerText = `👉 Đang chọn: Ô #${activeSlot + 1} (Bấm ảnh phía trên để điền)`;
                 }
             });
             isDragging = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
@@ -373,7 +386,6 @@
         link.click();
     }
 
-    /* QUY TRÌNH MỚI CHUẨN VIDEO RED BUTTON */
     function showConfirmModal() {
         document.getElementById('confirmModal').style.display = 'flex';
         document.getElementById('modalStep1').style.display = 'block';
@@ -385,7 +397,6 @@
     }
 
     function generatePrintCode() {
-        // Sinh mã in ngẫu nhiên 3 ký tự (Ví dụ: XDG, BLO, VUT...)
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let code = '';
         for (let i = 0; i < 3; i++) {
@@ -505,7 +516,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V8', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V8', JSON.stringify(base64Image));
                 
                 let img = new Image();
                 img.onload = function() {
