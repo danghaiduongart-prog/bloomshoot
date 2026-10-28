@@ -32,9 +32,16 @@
         .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px 2px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
 
         .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.95); padding: 12px; display: flex; gap: 10px; border-top: 1px solid #2a0826; z-index: 50; }
-        .btn-action { flex: 1; padding: 14px; font-size: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
+        .btn-action { flex: 1; padding: 14px; font-size: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; text-align: center; }
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
+
+        /* MODAL XÁC NHẬN IN & MÃ IN (ĐÚNG CHUẨN VIDEO) */
+        #confirmModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,2,10,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-card { background: #1a0518; border: 2px solid #d4af37; border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; text-align: center; }
+        .modal-card h3 { color: #fbe395; margin-bottom: 15px; font-size: 18px; }
+        .modal-card p { font-size: 13px; color: #b3a5b3; margin-bottom: 20px; line-height: 1.5; }
+        .print-code-box { background: #0b020a; border: 2px dashed #d4af37; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 32px; font-weight: bold; color: #fbe395; letter-spacing: 4px; }
 
         #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; }
         .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
@@ -50,6 +57,7 @@
 
     <button id="settingsBtn" onclick="openAdmin()">⚙️</button>
 
+    <!-- MÀN HÌNH ĐĂNG NHẬP (SESSION) -->
     <div id="loginScreen">
         <div class="login-card">
             <h2 style="color:#fbe395">BLOOM SHOOT</h2>
@@ -58,6 +66,7 @@
         </div>
     </div>
 
+    <!-- GIAO DIỆN CHÍNH CỦA KHÁCH TRÊN ĐIỆN THOẠI -->
     <div class="main-app" id="mainApp">
         <div class="section-box">
             <label style="font-size: 12px; color: #fbe395; font-weight: bold;">1. Chọn Mẫu Khung A4:</label>
@@ -72,9 +81,9 @@
         </div>
 
         <div class="section-box">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Khách Lên:</label>
+            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Từ Điện Thoại:</label>
             <div class="upload-zone" onclick="document.getElementById('fileInput').click()" style="margin-top:5px;">
-                <span style="font-size: 12px; color: #fbe395;">📁 + Bấm chọn ảnh từ điện thoại</span>
+                <span style="font-size: 12px; color: #fbe395;">📁 + Bấm chọn ảnh (Meitu, Xingtutu...)</span>
                 <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
             </div>
             <div class="photo-grid" id="photoGrid"></div>
@@ -95,11 +104,31 @@
         </div>
     </div>
 
+    <!-- THANH ĐIỀU HƯỚNG DƯỚI CÙNG -->
     <div class="bottom-bar" id="bottomBar" style="display:none;">
-        <button class="btn-action btn-download" onclick="downloadImage()">📥 TẢI VỀ</button>
-        <button class="btn-action btn-print" onclick="sendPrintOrder()">🖨️ GỬI IN</button>
+        <button class="btn-action btn-download" onclick="downloadImage()">📥 TẢI ẢNH VỀ</button>
+        <button class="btn-action btn-print" onclick="showConfirmModal()">✨ HOÀN THÀNH & IN</button>
     </div>
 
+    <!-- MODAL XÁC NHẬN IN & CẤP MÃ IN (CHUẨN VIDEO RED BUTTON) -->
+    <div id="confirmModal">
+        <div class="modal-card" id="modalStep1">
+            <h3>XÁC NHẬN IN ẢNH?</h3>
+            <p>Vui lòng kiểm tra kỹ bố cục ảnh trong khung trước khi xác nhận. Sau khi xác nhận, hệ thống sẽ cấp mã in để đưa cho nhân viên[cite: 6].</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
+                <button class="btn-action btn-print" onclick="generatePrintCode()">XÁC NHẬN</button>
+            </div>
+        </div>
+        <div class="modal-card" id="modalStep2" style="display:none;">
+            <h3>🎉 ĐÃ TẠO MÃ IN THÀNH CÔNG!</h3>
+            <p>Đọc mã in này cho nhân viên tại quầy và chờ lấy ảnh trong giây lát nhé[cite: 6]!</p>
+            <div class="print-code-box" id="displayPrintCode">XDG</div>
+            <button class="btn-action btn-print" onclick="location.reload()" style="width:100%;">HOÀN TẤT & TẠO PHIÊN MỚI</button>
+        </div>
+    </div>
+
+    <!-- TRANG QUẢN TRỊ ADMIN -->
     <div id="adminPanel">
         <div class="admin-sidebar">
             <h3 style="color:#fbe395; margin-bottom:10px;">🛠️ TRANG QUẢN TRỊ KHUNG</h3>
@@ -144,80 +173,24 @@
         'lilac_butterfly': ''
     };
 
-    // TỌA ĐỘ MASTER MỚI NHẤT VỪA CẬP NHẬT
     let masterFrames = {
         "purple_dream": [
-            {
-                "x": 74,
-                "y": 252,
-                "w": 1069.3140046636088,
-                "h": 1312.789593676705
-            },
-            {
-                "x": 1231,
-                "y": 151,
-                "w": 1057.4567619579416,
-                "h": 1427.5178253182698
-            }
+            { "x": 74, "y": 252, "w": 1069.3140046636088, "h": 1312.789593676705 },
+            { "x": 1231, "y": 151, "w": 1057.4567619579416, "h": 1427.5178253182698 }
         ],
         "pink_ribbon": [
-            {
-                "x": 180,
-                "y": 2410,
-                "w": 2120,
-                "h": 950
-            },
-            {
-                "x": 11,
-                "y": 18,
-                "w": 474.017899853837,
-                "h": 325.95744629175084
-            },
-            {
-                "x": 20,
-                "y": 370,
-                "w": 458.1605966222667,
-                "h": 323.7447701311987
-            },
-            {
-                "x": 9,
-                "y": 700,
-                "w": 475.4285365513393,
-                "h": 328.4199050923189
-            },
-            {
-                "x": 14,
-                "y": 1036,
-                "w": 481.30360772457414,
-                "h": 331.26290795343516
-            }
+            { "x": 180, "y": 2410, "w": 2120, "h": 950 },
+            { "x": 11, "y": 18, "w": 474.017899853837, "h": 325.95744629175084 },
+            { "x": 20, "y": 370, "w": 458.1605966222667, "h": 323.7447701311987 },
+            { "x": 9, "y": 700, "w": 475.4285365513393, "h": 328.4199050923189 },
+            { "x": 14, "y": 1036, "w": 481.30360772457414, "h": 331.26290795343516 }
         ],
         "blue_star": [],
         "retro_sun": [
-            {
-                "x": 90,
-                "y": 100,
-                "w": 1014.3427734375,
-                "h": 770.768010472065
-            },
-            {
-                "x": 80,
-                "y": 933,
-                "w": 1041.485630580357,
-                "h": 764.8600620718414
-            },
-            {
-                "x": 85,
-                "y": 1759,
-                "w": 1036.485630580357,
-                "h": 784.5230204214713
-            },
-            {
-                "x": 77,
-                "y": 2593,
-                "w": 1039.3427734375,
-                "h": 763.8588632628316
-            }
+            { "x": 90, "y": 100, "w": 1014.3427734375, "h": 770.768010472065 },
+            { "x": 80, "y": 933, "w": 1041.485630580357, "h": 764.8600620718414 },
+            { "x": 85, "y": 1759, "w": 1036.485630580357, "h": 784.5230204214713 },
+            { "x": 77, "y": 2593, "w": 1039.3427734375, "h": 763.8588632628316 }
         ],
         "green_check": [],
         "lilac_butterfly": []
@@ -399,7 +372,29 @@
         link.href = canvas.toDataURL('image/png');
         link.click();
     }
-    function sendPrintOrder() { alert("Đã gửi lệnh in thành công về máy quán!"); }
+
+    /* QUY TRÌNH MỚI CHUẨN VIDEO RED BUTTON */
+    function showConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'flex';
+        document.getElementById('modalStep1').style.display = 'block';
+        document.getElementById('modalStep2').style.display = 'none';
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    function generatePrintCode() {
+        // Sinh mã in ngẫu nhiên 3 ký tự (Ví dụ: XDG, BLO, VUT...)
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let code = '';
+        for (let i = 0; i < 3; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('displayPrintCode').innerText = code;
+        document.getElementById('modalStep1').style.display = 'none';
+        document.getElementById('modalStep2').style.display = 'block';
+    }
 
     /* QUẢN TRỊ ADMIN */
     let adminCanvas, adminCtx;
