@@ -43,7 +43,6 @@
         .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
         select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
-        textarea { width: 100%; height: 100px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 10px; padding: 8px; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -120,8 +119,7 @@
             <button class="btn-sub-admin" onclick="deleteAdminSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô Đang Chọn</button>
 
             <hr style="border-color:#2a0826; margin:15px 0;">
-            <button class="btn-admin" onclick="exportAdminCode()">📋 XUẤT CODE TỌA ĐỘ BẬC CAO</button>
-            <textarea id="adminOutputCode" placeholder="Bấm nút trên để lấy code..."></textarea>
+            <button class="btn-admin" onclick="downloadNewIndexFile()">🚀 XUẤT FILE INDEX.HTML MỚI</button>
             <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:10px;">🔙 THOÁT</button>
         </div>
         <div class="admin-canvas-box">
@@ -144,47 +142,27 @@
         'lilac_butterfly': ''
     };
 
-    // TỌA ĐỘ MASTER ĐÃ ĐƯỢC NHÚNG CHÍNH XÁC CỤC JSON CỦA DƯƠNG
+    // TỌA ĐỘ MASTER MẶC ĐỊNH
     let masterFrames = {
-        "purple_dream": [
-            {
-                "x": 74,
-                "y": 252,
-                "w": 1069.3140046636088,
-                "h": 1312.789593676705
-            },
-            {
-                "x": 1231,
-                "y": 151,
-                "w": 1057.4567619579416,
-                "h": 1427.5178253182698
-            }
-        ],
-        "pink_ribbon": [
-            {
-                "x": 180,
-                "y": 150,
-                "w": 2120,
-                "h": 1050
-            },
-            {
-                "x": 180,
-                "y": 1280,
-                "w": 2120,
-                "h": 1050
-            },
-            {
-                "x": 180,
-                "y": 2410,
-                "w": 2120,
-                "h": 950
-            }
-        ],
-        "blue_star": [],
-        "retro_sun": [],
-        "green_check": [],
-        "lilac_butterfly": []
-    };
+    "purple_dream": [
+        { "x": 74, "y": 252, "w": 1069.3140046636088, "h": 1312.789593676705 },
+        { "x": 1231, "y": 151, "w": 1057.4567619579416, "h": 1427.5178253182698 }
+    ],
+    "pink_ribbon": [
+        { "x": 180, "y": 1280, "w": 2120, "h": 1050 },
+        { "x": 180, "y": 2410, "w": 2120, "h": 950 },
+        { "x": 22, "y": 22, "w": 460.9999651227679, "h": 320.0423973845026 }
+    ],
+    "blue_star": [],
+    "retro_sun": [
+        { "x": 90, "y": 100, "w": 1014.3427734375, "h": 770.768010472065 },
+        { "x": 80, "y": 933, "w": 1041.485630580357, "h": 764.8600620718414 },
+        { "x": 85, "y": 1759, "w": 1036.485630580357, "h": 784.5230204214713 },
+        { "x": 77, "y": 2593, "w": 1039.3427734375, "h": 763.8588632628316 }
+    ],
+    "green_check": [],
+    "lilac_butterfly": []
+};
 
     function getStoredFrames() {
         let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V4');
@@ -502,6 +480,7 @@
 
         let allFrames = getStoredFrames();
         let slots = allFrames[adminFrameKey] || [];
+        slots.slots = slots || [];
         slots.forEach((slot, idx) => {
             let isActive = (idx === adminActiveSlot);
             adminCtx.fillStyle = isActive ? "rgba(212, 175, 55, 0.3)" : "rgba(42, 8, 38, 0.6)";
@@ -520,12 +499,37 @@
         });
     }
 
-    function exportAdminCode() {
-        let allFrames = getStoredFrames();
-        let codeStr = JSON.stringify(allFrames, null, 4);
-        document.getElementById('adminOutputCode').value = codeStr;
-        navigator.clipboard.writeText(codeStr);
-        alert("⚡ ĐÃ COPY CODE MỚI! Dán vào GitHub là điện thoại khách nhận chuẩn 100%!");
+    // TÍNH NĂNG TỰ ĐỘNG SINH VÀ TẢI VỀ FILE INDEX.HTML HOÀN CHỈNH
+    function downloadNewIndexFile() {
+        let currentFrames = getStoredFrames();
+        let framesString = JSON.stringify(currentFrames, null, 4);
+
+        // Lấy toàn bộ mã nguồn hiện tại của trang web nhưng tự động thay thế cụm masterFrames cũ bằng tọa độ mới nhất
+        let fullHtmlCode = document.documentElement.outerHTML;
+        
+        // Thay thế phần khai báo masterFrames cũ bằng dữ liệu mới
+        let targetRegex = /let masterFrames\s*=\\s*\{[\s\S]*?\};/;
+        let replacement = `let masterFrames = ${framesString};`;
+        
+        if (targetRegex.test(fullHtmlCode)) {
+            fullHtmlCode = fullHtmlCode.replace(targetRegex, replacement);
+        } else {
+            // Trường hợp quét theo format thông thường
+            fullHtmlCode = fullHtmlCode.replace(/let masterFrames\s*=[\s\S]*?\n\s{4}\};/, replacement);
+        }
+
+        // Tạo file blob và ép trình duyệt tự tải về
+        let blob = new Blob([fullHtmlCode], { type: 'text/html;charset=utf-8' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'index.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("⚡ ĐÃ TỰ ĐỘNG TẢI FILE INDEX.HTML MỚI VỀ MÁY!\n\nAnh chỉ cần kéo file vừa tải đè lên thư mục dự án trên máy tính rồi push lên GitHub là xong 100%!");
     }
 </script>
 </body>
