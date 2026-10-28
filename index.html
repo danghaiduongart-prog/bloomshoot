@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOOM SHOOT - Kho Ảnh Của Bạn</title>
+    <title>BLOOM SHOOT - Ghép Khung Ảnh Tự Do</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
@@ -11,41 +11,35 @@
         header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a0826; }
         .brand { font-size: 20px; font-weight: bold; color: #fbe395; letter-spacing: 2px; }
         .brand span { display: block; font-size: 10px; color: #b3a5b3; letter-spacing: 1px; margin-top: 2px; }
-        .btn-group-header { display: flex; gap: 8px; }
-        .btn-icon { background: #1a0518; border: 1px solid #2a0826; color: #fbe395; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
-        .btn-icon:hover { background: #2a0826; }
+        
+        .main-container { width: 100%; max-width: 1200px; padding: 20px; display: grid; grid-template-columns: 1fr 450px; gap: 20px; margin-top: 10px; }
+        @media(max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
 
-        /* Màn hình Nhập Mã Vé */
-        .login-card { background: #1a0518; padding: 40px 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; max-width: 380px; width: 90%; margin-top: 80px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .login-card h1 { color: #fbe395; font-size: 22px; margin-bottom: 6px; }
-        .login-card p { color: #b3a5b3; font-size: 13px; margin-bottom: 25px; }
-        .code-input { width: 100%; padding: 14px; font-size: 28px; font-weight: bold; text-align: center; border-radius: 12px; border: 2px solid #2a0826; background: #0b020a; color: #fbe395; letter-spacing: 6px; margin-bottom: 15px; }
-        .code-input:focus { outline: none; border-color: #d4af37; }
-        .btn-main { width: 100%; background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-main:hover { opacity: 0.9; }
-
-        /* Studio Workspace */
-        .studio-container { width: 100%; max-width: 1200px; padding: 20px; display: none; gap: 20px; margin-top: 10px; }
         .section-box { background: #1a0518; padding: 20px; border-radius: 16px; border: 1px solid #2a0826; }
         
-        /* Grid Ảnh Gốc */
-        .photos-section { flex: 1; }
-        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; margin-top: 15px; }
-        .photo-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; aspect-ratio: 3/4; background: #0b020a; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .photo-item:hover { border-color: #d4af37; }
+        /* Khu vực tải ảnh lên & Grid */
+        .upload-zone { border: 2px dashed #d4af37; padding: 25px; text-align: center; border-radius: 12px; background: #0b020a; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
+        .upload-zone:hover { background: #2a0826; }
         
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 45vh; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+        .photo-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; aspect-ratio: 3/4; background: #0b020a; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-item:hover { border-color: #d4af37; }
+
         .action-bar { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-sub { flex: 1; background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-sub { flex: 1; background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-sub:hover { background: #2a0826; }
 
         /* Khung & Canvas A4 */
-        .frame-section { width: 450px; display: flex; flex-direction: column; align-items: center; }
+        .frame-section { display: flex; flex-direction: column; align-items: center; }
         .frame-select-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-bottom: 15px; }
         .btn-frame { background: #0b020a; border: 1px solid #2a0826; color: #b3a5b3; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
         .btn-frame.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        canvas { width: 100%; max-height: 550px; object-fit: contain; border-radius: 8px; background: #0b020a; border: 1px solid #2a0826; margin-bottom: 15px; }
+        canvas { width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; background: #0b020a; border: 1px solid #2a0826; margin-bottom: 15px; }
+        
+        .btn-main { width: 100%; background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-main:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -55,38 +49,32 @@
             BLOOM SHOOT
             <span>VŨNG TÀU PHOTOBOTH</span>
         </div>
-        <div class="btn-group-header">
-            <button class="btn-icon" id="btnChangeCode" style="display: none;" onclick="location.reload()">⚙️ Đổi mã</button>
-            <button class="btn-icon" onclick="document.getElementById('configModal').style.display='flex'">🌐 Đổi IP LAN</button>
-        </div>
     </header>
 
-    <!-- Màn hình Nhập Mã -->
-    <div class="login-card" id="loginCard">
-        <h1>NHẬP MÃ VÉ</h1>
-        <p>Nhập mã phiên chụp của bạn để xem và tải ảnh</p>
-        <input type="text" id="ticketCodeInput" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
-        <button class="btn-main" onclick="startStudioSession()">XEM KHO ẢNH</button>
-    </div>
-
-    <!-- Màn hình Studio -->
-    <div class="studio-container" id="studioContainer">
-        
-        <!-- Trái: Ảnh gốc -->
-        <div class="section-box photos-section">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: #fbe395; font-size: 16px;">📸 KHO ẢNH CHỤP GỐC</h3>
-                <span id="txtSessionCode" style="color: #b3a5b3; font-size: 13px;">Mã vé: ------</span>
+    <div class="main-container">
+        <!-- Trái: Tải ảnh và chọn ảnh -->
+        <div class="section-box">
+            <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">📁 TẢI ẢNH CỦA BẠN</h3>
+            
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <p style="color: #fbe395; font-weight: bold; font-size: 14px;">+ Bấm vào đây để chọn ảnh từ điện thoại</p>
+                <p style="color: #b3a5b3; font-size: 12px; margin-top: 5px;">(Chọn nhiều ảnh gốc đã tải về máy)</p>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this)">
             </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                <h3 style="color: #fbe395; font-size: 14px;">KHO ẢNH ĐÃ CHỌN (<span id="photoCount">0</span>)</h3>
+            </div>
+            
             <div class="photo-grid" id="photoGrid"></div>
             
             <div class="action-bar">
-                <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự điền khung</button>
-                <button class="btn-sub" onclick="downloadAllPhotos()">📥 Tải tất cả ảnh gốc</button>
+                <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự động điền khung</button>
+                <button class="btn-sub" onclick="clearPhotos()" style="border-color: #ff6b81; color: #ff6b81;">🗑️ Xóa tất cả</button>
             </div>
         </div>
 
-        <!-- Phải: Chọn Khung A4 & In -->
+        <!-- Phải: Chọn Khung & Xuất File -->
         <div class="section-box frame-section">
             <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">🎨 CHỌN KHUNG GHÉP (A4)</h3>
             
@@ -98,74 +86,41 @@
 
             <canvas id="a4Canvas" width="2480" height="3508"></canvas>
 
-            <button class="btn-main" onclick="printOrDownloadA4()">🖨️ TẢI FILE KHUNG A4</button>
-        </div>
-    </div>
-
-    <!-- Modal Cấu hình IP LAN -->
-    <div class="modal" id="configModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100;">
-        <div class="modal-body" style="background: #1a0518; border: 1px solid #2a0826; padding: 25px; border-radius: 16px; width: 90%; max-width: 450px;">
-            <h3 style="color: #fbe395; margin-bottom: 15px;">🌐 Cấu Hình IP Máy Booth (LAN)</h3>
-            <p style="font-size: 12px; color: #b3a5b3; margin-bottom: 10px;">Nhập IP máy tính chạy Python ở quán (kèm cổng 5001):</p>
-            <input type="text" id="serverUrlInput" placeholder="http://192.168.1.50:5001" style="width: 100%; padding: 12px; background: #0b020a; border: 1px solid #2a0826; color: white; border-radius: 8px; margin-bottom: 15px;">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-sub" onclick="document.getElementById('configModal').style.display='none'">Hủy</button>
-                <button class="btn-main" onclick="saveServerConfig()">Lưu IP</button>
-            </div>
+            <button class="btn-main" onclick="downloadA4()">📥 TẢI FILE KHUNG A4 VỀ MÁY</button>
         </div>
     </div>
 
 <script>
-    let serverUrl = localStorage.getItem('bloom_lan_ip') || "http://localhost:5001";
-    document.getElementById('serverUrlInput').value = serverUrl;
-
-    function saveServerConfig() {
-        let val = document.getElementById('serverUrlInput').value.trim();
-        if (val.endsWith('/')) val = val.slice(0, -1);
-        serverUrl = val;
-        localStorage.setItem('bloom_lan_ip', serverUrl);
-        document.getElementById('configModal').style.display = 'none';
-        if(activeCode) fetchPhotos();
-        alert("Đã lưu IP thành công!");
-    }
-
-    let activeCode = "";
     let availablePhotos = [];
     let assignedPhotos = {}; 
     let currentFrame = "basic_4"; 
 
-    async function startStudioSession() {
-        let code = document.getElementById('ticketCodeInput').value.trim();
-        if (!code) return alert("Vui lòng nhập mã vé!");
-        activeCode = code;
-        
-        document.getElementById('loginCard').style.display = 'none';
-        document.getElementById('studioContainer').style.display = 'grid';
-        document.getElementById('btnChangeCode').style.display = 'block';
-        document.getElementById('txtSessionCode').innerText = "Mã vé: " + activeCode;
-
-        await fetchPhotos();
-        // Tự động đồng bộ liên tục mỗi 3 giây để cập nhật ảnh mới từ mây
-        setInterval(fetchPhotos, 3000);
-    }
-
-    async function fetchPhotos() {
-        if (!activeCode) return;
-        try {
-            let res = await fetch(`${serverUrl}/api/images?code=${activeCode}`);
-            if (res.ok) {
-                let data = await res.json();
-                // Tự động phân loại: Nếu là link mây Cloudinary thì giữ nguyên, nếu là đường dẫn nội bộ thì ghép với serverUrl
-                availablePhotos = data.map(url => url.startsWith('http') ? url : `${serverUrl}${url}`);
+    function handleFiles(input) {
+        if (!input.files) return;
+        for (let file of input.files) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                availablePhotos.push(e.target.result);
                 renderPhotoGrid();
                 renderA4Canvas();
             }
-        } catch (e) { console.log("Đang kết nối tới máy chủ..."); }
+            reader.readAsDataURL(file);
+        }
+        document.getElementById('photoCount').innerText = availablePhotos.length;
+    }
+
+    function clearPhotos() {
+        availablePhotos = [];
+        assignedPhotos = {};
+        document.getElementById('photoGrid').innerHTML = '';
+        document.getElementById('photoCount').innerText = 0;
+        renderA4Canvas();
     }
 
     function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
+        document.getElementById('photoCount').innerText = availablePhotos.length;
         availablePhotos.forEach((url, idx) => {
             let item = document.createElement('div');
             item.className = 'photo-item';
@@ -256,8 +211,6 @@
 
                 let img = await loadImage(assignedPhotos[i]);
                 if (img) {
-                    ctx.translate(slot.x + slot.w, slot.y);
-                    ctx.scale(-1, 1);
                     let imgRatio = img.width / img.height;
                     let slotRatio = slot.w / slot.h;
                     let dW, dH, oX = 0, oY = 0;
@@ -266,7 +219,7 @@
                     } else {
                         dW = slot.w; dH = slot.w / imgRatio; oY = (dH - slot.h) / 2;
                     }
-                    ctx.drawImage(img, -oX, -oY, dW, dH);
+                    ctx.drawImage(img, slot.x - oX, slot.y - oY, dW, dH);
                 }
             } else {
                 ctx.fillStyle = '#b3a5b3';
@@ -280,36 +233,28 @@
         ctx.fillStyle = '#fbe395';
         ctx.font = 'bold 50px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`MÃ VÉ: #${activeCode} - BLOOM SHOOT VŨNG TÀU`, width / 2, height - 100);
+        ctx.fillText(`BLOOM SHOOT VŨNG TÀU - SELF SERVICE`, width / 2, height - 100);
     }
 
     function loadImage(src) {
         return new Promise(resolve => {
             let img = new Image();
-            img.crossOrigin = 'anonymous';
             img.onload = () => resolve(img);
             img.onerror = () => resolve(null);
             img.src = src;
         });
     }
 
-    function downloadAllPhotos() {
-        availablePhotos.forEach((url, i) => {
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `BLOOM_${activeCode}_${i+1}.jpg`;
-            a.target = '_blank';
-            a.click();
-        });
-    }
-
-    function printOrDownloadA4() {
+    function downloadA4() {
         let canvas = document.getElementById('a4Canvas');
         let link = document.createElement('a');
-        link.download = `BLOOM_FRAME_A4_${activeCode}.png`;
+        link.download = `BLOOM_FRAME_A4.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
     }
+
+    // Khởi tạo khung trống ban đầu
+    renderA4Canvas();
 </script>
 </body>
 </html>
