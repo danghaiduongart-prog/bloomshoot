@@ -21,11 +21,22 @@
         .select-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 15px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
         .select-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        /* MÀN HÌNH CHÍNH (GỌN GÀNG, KHUNG ĐÃ THU NHỎ VỪA TẦM NHÌN) */
+        /* MÀN HÌNH CHÍNH - ÉP KHUNG CANVAS CHUẨN TỈ LỆ A4 VỪA KHÍT MÀN HÌNH */
         .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
         
         .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; }
-        canvas { max-width: 75%; max-height: 75%; display: block; touch-action: none; object-fit: contain; transition: transform 0.3s ease; }
+        
+        /* Cố định canvas hiển thị chuẩn tỉ lệ A4 dọc */
+        canvas { 
+            width: auto; 
+            height: 100%; 
+            max-height: 100%; 
+            aspect-ratio: 2480 / 3508; 
+            display: block; 
+            touch-action: none; 
+            object-fit: contain; 
+            transition: transform 0.3s ease; 
+        }
         
         .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; flex-shrink: 0; }
         .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 6px 2px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
@@ -292,7 +303,7 @@
             currentSlots.forEach((slot, idx) => {
                 if(touchX >= slot.x && touchX <= slot.x + slot.w && touchY >= slot.y && touchY <= slot.y + slot.h) {
                     activeSlot = idx;
-                    updateCanvasFocus(); // Tự động zoom focus vào ô được chọn
+                    updateCanvasFocus();
                 }
             });
             isDragging = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
@@ -313,20 +324,16 @@
         loadFrameOverlay();
     }
 
-    // TÍNH TOÁN VÀ TỰ ĐỘNG FOCUS PHÓNG TO VÙNG Ô ĐANG CHỌN TRÊN MÀN HÌNH
-    function updateCanvasField() {}
     function updateCanvasFocus() {
         let currentSlots = getCurrentSlots();
         let slot = currentSlots[activeSlot];
         if(!slot) return;
 
         let canvasEl = document.getElementById('a4Canvas');
-        // Tính toán tâm của ô và tỉ lệ phóng to thông minh
-        let scaleFactor = 2.2; // Phóng to gấp 2.2 lần vào ô
+        let scaleFactor = 2.0; 
         let centerX = slot.x + slot.w / 2;
         let centerY = slot.y + slot.h / 2;
         
-        // Dịch chuyển tâm canvas CSS transform origin vào đúng ô đang chọn
         let originX = (centerX / canvas.width) * 100;
         let originY = (centerY / canvas.height) * 100;
         
@@ -345,8 +352,8 @@
                 canvas.width = fImg.width;
                 canvas.height = fImg.height;
                 frameOverlayImg = fImg;
+                canvas.style.transform = `scale(1)`; // Mặc định reset về chuẩn A4 vừa khít
                 redrawCanvas();
-                updateCanvasFocus();
             };
             fImg.onerror = function() {
                 canvas.width = 2480; canvas.height = 3508;
@@ -528,7 +535,7 @@
                 adminFrameImg = null;
                 redrawAdmin();
             };
-            img.src = frameSrc;
+            adminCanvas.src = frameSrc;
         } else {
             adminCanvas.width = 2480; adminCanvas.height = 3508;
             adminFrameImg = null;
