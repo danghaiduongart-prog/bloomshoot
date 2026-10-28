@@ -144,7 +144,7 @@
         'lilac_butterfly': ''
     };
 
-    // TỌA ĐỘ MASTER ĐÃ ĐƯỢC CẬP NHẬT CHUẨN XÁC
+    // TỌA ĐỘ MASTER MỚI NHẤT VỪA CẬP NHẬT
     let masterFrames = {
         "purple_dream": [
             {
@@ -180,14 +180,14 @@
                 "h": 323.7447701311987
             },
             {
-                "x": 4,
-                "y": 722,
-                "w": 494.8750683708882,
-                "h": 341.1572684270536
+                "x": 9,
+                "y": 700,
+                "w": 475.4285365513393,
+                "h": 328.4199050923189
             },
             {
-                "x": 9,
-                "y": 1088,
+                "x": 14,
+                "y": 1036,
                 "w": 481.30360772457414,
                 "h": 331.26290795343516
             }
@@ -224,7 +224,7 @@
     };
 
     function getStoredFrames() {
-        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V7');
+        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V8');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -232,7 +232,7 @@
     }
 
     function getStoredImages() {
-        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V7');
+        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V8');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -462,12 +462,12 @@
             if (isAdminResizing) {
                 slot.w = Math.max(100, mouseX - slot.x);
                 slot.h = Math.max(100, mouseY - slot.y);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V7', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V8', JSON.stringify(allFrames));
                 redrawAdmin();
             } else if (isAdminDragging) {
                 slot.x = Math.round(mouseX - adminStartX);
                 slot.y = Math.round(mouseY - adminStartY);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V7', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V8', JSON.stringify(allFrames));
                 redrawAdmin();
             }
         };
@@ -510,7 +510,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V7', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V8', JSON.stringify(allImages));
                 
                 let img = new Image();
                 img.onload = function() {
@@ -531,7 +531,7 @@
         if(!allFrames[adminFrameKey]) allFrames[adminFrameKey] = [];
         allFrames[adminFrameKey].push({ x: 200, y: 200, w: 600, h: 600 });
         adminActiveSlot = allFrames[adminFrameKey].length - 1;
-        localStorage.setItem('BLOOM_ALL_FRAMES_V7', JSON.stringify(allFrames));
+        localStorage.setItem('BLOOM_ALL_FRAMES_V8', JSON.stringify(allFrames));
         redrawAdmin();
     }
 
@@ -541,7 +541,7 @@
         if (slots.length > 0) {
             slots.splice(adminActiveSlot, 1);
             adminActiveSlot = Math.max(0, slots.length - 1);
-            localStorage.setItem('BLOOM_ALL_FRAMES_V7', JSON.stringify(allFrames));
+            localStorage.setItem('BLOOM_ALL_FRAMES_V8', JSON.stringify(allFrames));
             redrawAdmin();
         }
     }
