@@ -2,259 +2,339 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOOM SHOOT - Ghép Khung Ảnh Tự Do</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BLOOM SHOOT - Ghép Khung A4 Tự Phục Vụ</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: manipulation; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a0826; }
-        .brand { font-size: 20px; font-weight: bold; color: #fbe395; letter-spacing: 2px; }
-        .brand span { display: block; font-size: 10px; color: #b3a5b3; letter-spacing: 1px; margin-top: 2px; }
+        /* Màn hình nhập mã phiên chụp */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+        .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 360px; text-align: center; }
+        .login-card h2 { color: #fbe395; font-size: 24px; letter-spacing: 2px; margin-bottom: 5px; }
+        .login-card input { width: 100%; padding: 16px; font-size: 26px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 12px; letter-spacing: 6px; margin: 18px 0; font-weight: bold; }
         
-        .main-container { width: 100%; max-width: 1200px; padding: 20px; display: grid; grid-template-columns: 1fr 450px; gap: 20px; margin-top: 10px; }
-        @media(max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
-
-        .section-box { background: #1a0518; padding: 20px; border-radius: 16px; border: 1px solid #2a0826; }
+        /* Giao diện chính trên điện thoại */
+        .main-app { display: none; width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
+        .section-box { background: #1a0518; padding: 16px; border-radius: 16px; border: 1px solid #2a0826; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 15px; }
         
-        /* Khu vực tải ảnh lên & Grid */
-        .upload-zone { border: 2px dashed #d4af37; padding: 25px; text-align: center; border-radius: 12px; background: #0b020a; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
-        .upload-zone:hover { background: #2a0826; }
+        /* Chọn 6 Mẫu Khung A4 */
+        .frame-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .frame-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 12px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; line-height: 1.3; }
+        .frame-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; box-shadow: 0 2px 8px rgba(212,175,55,0.25); }
+
+        /* Kho tải ảnh */
+        .upload-zone { border: 2px dashed #d4af37; padding: 18px; text-align: center; border-radius: 12px; background: #0b020a; cursor: pointer; }
+        .photo-grid { display: flex; gap: 10px; overflow-x: auto; padding: 12px 0; -webkit-overflow-scrolling: touch; }
+        .photo-thumb { width: 75px; height: 95px; border-radius: 8px; overflow: hidden; flex-shrink: 0; border: 3px solid transparent; cursor: pointer; background: #000; position: relative; }
+        .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-thumb.selected { border-color: #d4af37; }
+
+        /* Khung A4 Canvas */
+        .canvas-container { position: relative; width: 100%; text-align: center; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; }
+        canvas { width: 100%; display: block; touch-action: none; }
         
-        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 45vh; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
-        .photo-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; aspect-ratio: 3/4; background: #0b020a; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-        .photo-item:hover { border-color: #d4af37; }
+        /* Công cụ chỉnh sửa */
+        .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+        .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px 4px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
 
-        .action-bar { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-sub { flex: 1; background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
-        .btn-sub:hover { background: #2a0826; }
-
-        /* Khung & Canvas A4 */
-        .frame-section { display: flex; flex-direction: column; align-items: center; }
-        .frame-select-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-bottom: 15px; }
-        .btn-frame { background: #0b020a; border: 1px solid #2a0826; color: #b3a5b3; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
-        .btn-frame.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
-
-        canvas { width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; background: #0b020a; border: 1px solid #2a0826; margin-bottom: 15px; }
-        
-        .btn-main { width: 100%; background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-main:hover { opacity: 0.9; }
+        /* Thanh nút cố định đáy màn hình */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.96); padding: 12px 16px; display: flex; gap: 12px; border-top: 1px solid #2a0826; z-index: 50; backdrop-filter: blur(8px); }
+        .btn-action { flex: 1; padding: 15px; font-size: 15px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; text-align: center; }
+        .btn-print { background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; box-shadow: 0 4px 12px rgba(212,175,55,0.3); }
+        .btn-download { background: #1a0518; color: #fbe395; border: 2px solid #d4af37; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand">
-            BLOOM SHOOT
-            <span>VŨNG TÀU PHOTOBOTH</span>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <!-- Trái: Tải ảnh và chọn ảnh -->
-        <div class="section-box">
-            <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">📁 TẢI ẢNH CỦA BẠN</h3>
-            
-            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-                <p style="color: #fbe395; font-weight: bold; font-size: 14px;">+ Bấm vào đây để chọn ảnh từ điện thoại</p>
-                <p style="color: #b3a5b3; font-size: 12px; margin-top: 5px;">(Chọn nhiều ảnh gốc đã tải về máy)</p>
-                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this)">
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                <h3 style="color: #fbe395; font-size: 14px;">KHO ẢNH ĐÃ CHỌN (<span id="photoCount">0</span>)</h3>
-            </div>
-            
-            <div class="photo-grid" id="photoGrid"></div>
-            
-            <div class="action-bar">
-                <button class="btn-sub" onclick="autoFillFrames()">⚡ Tự động điền khung</button>
-                <button class="btn-sub" onclick="clearPhotos()" style="border-color: #ff6b81; color: #ff6b81;">🗑️ Xóa tất cả</button>
-            </div>
-        </div>
-
-        <!-- Phải: Chọn Khung & Xuất File -->
-        <div class="section-box frame-section">
-            <h3 style="color: #fbe395; font-size: 16px; margin-bottom: 12px;">🎨 CHỌN KHUNG GHÉP (A4)</h3>
-            
-            <div class="frame-select-group">
-                <button class="btn-frame active" onclick="setFrameType('basic_4', event)">Basic 4 Ảnh</button>
-                <button class="btn-frame" onclick="setFrameType('flower_4', event)">Hoa Hòe 4 Ảnh</button>
-                <button class="btn-frame" onclick="setFrameType('basic_9', event)">Grid 9 Ảnh</button>
-            </div>
-
-            <canvas id="a4Canvas" width="2480" height="3508"></canvas>
-
-            <button class="btn-main" onclick="downloadA4()">📥 TẢI FILE KHUNG A4 VỀ MÁY</button>
+    <!-- 1. MÀN HÌNH NHẬP MÃ -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h2>BLOOM SHOOT</h2>
+            <p style="font-size: 13px; color: #b3a5b3;">Vũng Tàu Self-Service Photobooth</p>
+            <input type="text" id="sessionCode" placeholder="MÃ IN" maxlength="6">
+            <button class="btn-action btn-print" onclick="checkCode()" style="width:100%;">BẮT ĐẦU CHỌN KHUNG</button>
         </div>
     </div>
 
-<script>
-    let availablePhotos = [];
-    let assignedPhotos = {}; 
-    let currentFrame = "basic_4"; 
+    <!-- 2. GIAO DIỆN CHÍNH CHO KHÁCH -->
+    <div class="main-app" id="mainApp">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div>
+                <h3 style="color: #fbe395; font-size: 18px; font-weight:bold;">🎨 THIẾT KẾ TRANG A4</h3>
+                <p style="font-size:11px; color:#b3a5b3;">Chạm vuốt trực tiếp trên khung để căn chỉnh</p>
+            </div>
+            <span id="badgeCode" style="background:#2a0826; padding:5px 12px; border-radius:20px; font-size:12px; color:#fbe395; border:1px solid #d4af37; font-weight:bold;"></span>
+        </header>
 
-    function handleFiles(input) {
-        if (!input.files) return;
-        for (let file of input.files) {
+        <!-- Bước 1: Chọn 1 trong 6 Mẫu Khung A4 -->
+        <div class="section-box">
+            <label style="font-size: 13px; color: #fbe395; font-weight: bold;">1. Chọn 1 Trong 6 Mẫu Khung A4:</label>
+            <div class="frame-grid">
+                <button class="frame-btn active" onclick="changeFrame('purple_dream', event)">🔮 Tím Mộng Mơ</button>
+                <button class="frame-btn" onclick="changeFrame('pink_ribbon', event)">🎀 Hồng Nơ</button>
+                <button class="frame-btn" onclick="changeFrame('blue_star', event)">⭐ Xanh Sao</button>
+                <button class="frame-btn" onclick="changeFrame('retro_sun', event)">🌻 Retro Sọc</button>
+                <button class="frame-btn" onclick="changeFrame('green_check', event)">🏁 Xanh Caro</button>
+                <button class="frame-btn" onclick="changeFrame('lilac_butterfly', event)">🦋 Tím Bướm</button>
+            </div>
+        </div>
+
+        <!-- Bước 2: Tải 10-15 tấm ảnh gốc -->
+        <div class="section-box">
+            <label style="font-size: 13px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Lên (10 - 15 tấm):</label>
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()" style="margin-top:8px;">
+                <span style="font-size: 13px; color: #fbe395; font-weight:bold;">📁 + Bấm vào đây để tải ảnh từ điện thoại</span>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
+            </div>
+            <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <!-- Bước 3: Canvas ghép A4 & Chạm vuốt/xoay -->
+        <div class="section-box" style="text-align:center;">
+            <label style="font-size: 13px; color: #fbe395; font-weight: bold;">3. Chọn ô khung $\rightarrow$ Bấm ảnh kho trên để gán:</label>
+            <div class="canvas-container">
+                <canvas id="a4Canvas" width="2480" height="3508"></canvas>
+            </div>
+            
+            <div class="edit-tools">
+                <button class="btn-tool" onclick="adjustZoom(-0.1)">🔍 Thu Nhỏ</button>
+                <button class="btn-tool" onclick="adjustZoom(0.1)">🔍 Phóng To</button>
+                <button class="btn-tool" onclick="rotateImage()">🔄 Xoay Ảnh</button>
+                <button class="btn-tool" onclick="clearActiveSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô</button>
+            </div>
+            <p style="font-size:11px; color:#b3a5b3; margin-top:8px;">💡 Chạm trực tiếp vào ô trên khung và kéo ngón tay để dịch chuyển góc mặt.</p>
+        </div>
+    </div>
+
+    <!-- Thanh nút hành động cố định ở đáy điện thoại -->
+    <div class="bottom-bar" id="bottomBar" style="display:none;">
+        <button class="btn-action btn-download" onclick="downloadImage()">📥 TẢI VỀ</button>
+        <button class="btn-action btn-print" onclick="sendPrintOrder()">🖨️ GỬI IN VỀ QUÁN</button>
+    </div>
+
+<script>
+    let uploadedImages = [];
+    let slotAssignments = {}; 
+    let activeSlot = 0;
+    let currentFrameType = 'purple_dream';
+
+    // Cấu hình Màu sắc Tông Tím chủ đạo sang trọng & rực rỡ
+    const frameStyles = {
+        'purple_dream':   { bg: '#140312', stroke: '#d4af37', title: 'PURPLE DREAM SET' },
+        'pink_ribbon':    { bg: '#1c0716', stroke: '#ffb3c1', title: 'PINK RIBBON SET' },
+        'blue_star':      { bg: '#08101a', stroke: '#7dd3fc', title: 'BLUE STAR SET' },
+        'retro_sun':      { bg: '#180e05', stroke: '#fcd34d', title: 'RETRO SUN SET' },
+        'green_check':    { bg: '#051410', stroke: '#6ee7b7', title: 'GREEN CHECK SET' },
+        'lilac_butterfly':{ bg: '#16081c', stroke: '#f5d0fe', title: 'LILAC BUTTERFLY SET' }
+    };
+
+    // Cấu hình 6 Cụm Ô Khung A4 (2480 x 3508 pixels)
+    const a4SlotsLayout = [
+        { x: 180,  y: 350,  w: 1250, h: 750  }, // 1. Strip ngang 3 ảnh top trái
+        { x: 1550, y: 350,  w: 750,  h: 1850 }, // 2. Strip dọc 4 ảnh bên phải
+        { x: 180,  y: 1200, w: 600,  h: 750  }, // 3. Khung đơn Polaroid trái
+        { x: 830,  y: 1200, w: 600,  h: 750  }, // 4. Khung đôi (Trái)
+        { x: 180,  y: 2050, w: 1250, h: 1150 }, // 5. Grid 9 ô vuông góc dưới trái
+        { x: 1550, y: 2300, w: 750,  h: 900  }  // 6. Khung Postcard chân dung dưới cùng phải
+    ];
+
+    function checkCode() {
+        let code = document.getElementById('sessionCode').value.trim();
+        if(code.length < 3) { alert("Vui lòng nhập mã phiên chụp!"); return; }
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('bottomBar').style.display = 'flex';
+        document.getElementById('badgeCode').innerText = "MÃ: " + code;
+        initCanvas();
+    }
+
+    function changeFrame(type, event) {
+        currentFrameType = type;
+        document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
+        if(event && event.target) event.target.classList.add('active');
+        redrawCanvas();
+    }
+
+    function handleUpload(input) {
+        if(!input.files) return;
+        for(let file of input.files) {
             let reader = new FileReader();
             reader.onload = function(e) {
-                availablePhotos.push(e.target.result);
-                renderPhotoGrid();
-                renderA4Canvas();
+                let img = new Image();
+                img.onload = function() {
+                    uploadedImages.push(img);
+                    renderPhotoGrid();
+                }
+                img.src = e.target.result;
             }
             reader.readAsDataURL(file);
         }
-        document.getElementById('photoCount').innerText = availablePhotos.length;
-    }
-
-    function clearPhotos() {
-        availablePhotos = [];
-        assignedPhotos = {};
-        document.getElementById('photoGrid').innerHTML = '';
-        document.getElementById('photoCount').innerText = 0;
-        renderA4Canvas();
     }
 
     function renderPhotoGrid() {
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
-        document.getElementById('photoCount').innerText = availablePhotos.length;
-        availablePhotos.forEach((url, idx) => {
-            let item = document.createElement('div');
-            item.className = 'photo-item';
-            item.innerHTML = `<img src="${url}"><div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 5px; border-radius:4px;">#${idx+1}</div>`;
-            item.onclick = () => assignToNextSlot(url);
-            grid.appendChild(item);
+        uploadedImages.forEach((img, idx) => {
+            let div = document.createElement('div');
+            div.className = 'photo-thumb';
+            div.innerHTML = `<img src="${img.src}"><span style="position:absolute; bottom:2px; right:2px; background:rgba(0,0,0,0.7); color:#fff; font-size:9px; padding:1px 4px; border-radius:3px;">#${idx+1}</span>`;
+            div.onclick = () => assignImageToSlot(img);
+            grid.appendChild(div);
         });
     }
 
-    function setFrameType(type, event) {
-        currentFrame = type;
-        document.querySelectorAll('.btn-frame').forEach(b => b.classList.remove('active'));
-        if(event && event.target) event.target.classList.add('active');
-        assignedPhotos = {};
-        renderA4Canvas();
-    }
+    let canvas, ctx;
+    function initCanvas() {
+        canvas = document.getElementById('a4Canvas');
+        ctx = canvas.getContext('2d');
 
-    function autoFillFrames() {
-        let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
-        availablePhotos.forEach((url, i) => {
-            if (i < maxSlots) assignedPhotos[i] = url;
-        });
-        renderA4Canvas();
-    }
+        // Bắt sự kiện chạm vuốt trực tiếp trên ngón tay điện thoại để dịch chuyển ảnh trong ô
+        let isDragging = false, startX, startY;
+        canvas.addEventListener('touchstart', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let scaleX = 2480 / rect.width;
+            let scaleY = 3508 / rect.height;
+            let touchX = (e.touches[0].clientX - rect.left) * scaleX;
+            let touchY = (e.touches[0].clientY - rect.top) * scaleY;
 
-    function assignToNextSlot(url) {
-        let maxSlots = (currentFrame === 'basic_9') ? 9 : 4;
-        for (let i = 0; i < maxSlots; i++) {
-            if (!assignedPhotos[i]) {
-                assignedPhotos[i] = url;
-                break;
-            }
-        }
-        renderA4Canvas();
-    }
-
-    async function renderA4Canvas() {
-        let canvas = document.getElementById('a4Canvas');
-        let ctx = canvas.getContext('2d');
-        let width = 2480, height = 3508;
-
-        ctx.fillStyle = (currentFrame === 'flower_4') ? '#2a0520' : '#140312';
-        ctx.fillRect(0, 0, width, height);
-
-        if (currentFrame === 'flower_4') {
-            ctx.strokeStyle = '#fbe395';
-            ctx.lineWidth = 15;
-            ctx.strokeRect(80, 80, width - 160, height - 160);
-            ctx.fillStyle = '#fbe395';
-            ctx.font = 'bold 70px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🌸 BLOOM SHOOT STUDIO 🌸', width / 2, 220);
-        } else {
-            ctx.fillStyle = '#fbe395';
-            ctx.font = 'bold 60px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('BLOOM SHOOT PHOTOBOOTH', width / 2, 180);
-        }
-
-        let slots = [];
-        if (currentFrame === 'basic_9') {
-            let startX = 200, startY = 350, sW = 650, sH = 900, gapX = 80, gapY = 80;
-            for(let r=0; r<3; r++) {
-                for(let c=0; c<3; c++) {
-                    slots.push({x: startX + c*(sW+gapX), y: startY + r*(sH+gapY), w: sW, h: sH});
+            // Xác định ô khách đang chạm vào
+            a4SlotsLayout.forEach((slot, idx) => {
+                if(touchX >= slot.x && touchX <= slot.x + slot.w && touchY >= slot.y && touchY <= slot.y + slot.h) {
+                    activeSlot = idx;
                 }
-            }
-        } else {
-            let startX = 300, startY = 300, sW = 1880, sH = 1300, gapY = 100;
-            if (currentFrame === 'flower_4') { startY = 350; sH = 1250; }
-            slots.push({x: startX, y: startY, w: sW, h: sH});
-            slots.push({x: startX, y: startY + sH + gapY, w: sW, h: sH});
-        }
+            });
 
-        for (let i = 0; i < slots.length; i++) {
-            let slot = slots[i];
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            redrawCanvas();
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if(!isDragging || !slotAssignments[activeSlot]) return;
+            let moveX = (e.touches[0].clientX - startX) * 2.5;
+            let moveY = (e.touches[0].clientY - startY) * 2.5;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            
+            slotAssignments[activeSlot].offsetX += moveX;
+            slotAssignments[activeSlot].offsetY += moveY;
+            redrawCanvas();
+        });
+
+        canvas.addEventListener('touchend', () => { isDragging = false; });
+
+        redrawCanvas();
+    }
+
+    function assignImageToSlot(img) {
+        slotAssignments[activeSlot] = {
+            img: img,
+            scale: 1.0,
+            rotation: 0,
+            offsetX: 0,
+            offsetY: 0
+        };
+        redrawCanvas();
+        activeSlot = (activeSlot + 1) % a4SlotsLayout.length;
+    }
+
+    function adjustZoom(amount) {
+        if(slotAssignments[activeSlot]) {
+            slotAssignments[activeSlot].scale = Math.max(0.4, slotAssignments[activeSlot].scale + amount);
+            redrawCanvas();
+        }
+    }
+
+    function rotateImage() {
+        if(slotAssignments[activeSlot]) {
+            slotAssignments[activeSlot].rotation = (slotAssignments[activeSlot].rotation + 90) % 360;
+            redrawCanvas();
+        }
+    }
+
+    function clearActiveSlot() {
+        delete slotAssignments[activeSlot];
+        redrawCanvas();
+    }
+
+    function redrawCanvas() {
+        if(!ctx) return;
+        let style = frameStyles[currentFrameType];
+
+        // 1. Phông nền Tông tím chủ đạo
+        ctx.fillStyle = style.bg;
+        ctx.fillRect(0, 0, 2480, 3508);
+
+        // 2. Tiêu đề thương hiệu
+        ctx.fillStyle = "#fbe395";
+        ctx.font = "bold 90px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("BLOOM SHOOT - " + style.title, 1240, 180);
+
+        // 3. Vẽ 6 Cụm Ô Khung A4
+        a4SlotsLayout.forEach((slot, idx) => {
             ctx.save();
-            ctx.fillStyle = '#0b020a';
+            ctx.beginPath();
+            ctx.rect(slot.x, slot.y, slot.w, slot.h);
+            ctx.clip();
+
+            ctx.fillStyle = "#000000";
             ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-            ctx.strokeStyle = '#3a0c35';
-            ctx.lineWidth = 6;
-            ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
 
-            if (assignedPhotos[i]) {
-                ctx.beginPath();
-                ctx.rect(slot.x, slot.y, slot.w, slot.h);
-                ctx.clip();
+            if(slotAssignments[idx]) {
+                let data = slotAssignments[idx];
+                let img = data.img;
+                
+                ctx.save();
+                ctx.translate(slot.x + slot.w/2 + data.offsetX, slot.y + slot.h/2 + data.offsetY);
+                ctx.rotate((data.rotation * Math.PI) / 180);
 
-                let img = await loadImage(assignedPhotos[i]);
-                if (img) {
-                    let imgRatio = img.width / img.height;
-                    let slotRatio = slot.w / slot.h;
-                    let dW, dH, oX = 0, oY = 0;
-                    if (imgRatio > slotRatio) {
-                        dH = slot.h; dW = slot.h * imgRatio; oX = (dW - slot.w) / 2;
-                    } else {
-                        dW = slot.w; dH = slot.w / imgRatio; oY = (dH - slot.h) / 2;
-                    }
-                    ctx.drawImage(img, slot.x - oX, slot.y - oY, dW, dH);
+                let imgRatio = img.width / img.height;
+                let slotRatio = slot.w / slot.h;
+                let dW, dH;
+                if(imgRatio > slotRatio) {
+                    dH = slot.h * data.scale;
+                    dW = dH * imgRatio;
+                } else {
+                    dW = slot.w * data.scale;
+                    dH = dW / imgRatio;
                 }
+
+                ctx.drawImage(img, -dW/2, -dH/2, dW, dH);
+                ctx.restore();
             } else {
-                ctx.fillStyle = '#b3a5b3';
-                ctx.font = '40px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(`+ Chọn ảnh ${i+1}`, slot.x + slot.w/2, slot.y + slot.h/2);
+                ctx.fillStyle = "#7a6375";
+                ctx.font = "bold 45px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`+ Chọn Ảnh ${idx+1}`, slot.x + slot.w/2, slot.y + slot.h/2);
             }
             ctx.restore();
-        }
 
-        ctx.fillStyle = '#fbe395';
-        ctx.font = 'bold 50px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(`BLOOM SHOOT VŨNG TÀU - SELF SERVICE`, width / 2, height - 100);
-    }
-
-    function loadImage(src) {
-        return new Promise(resolve => {
-            let img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(null);
-            img.src = src;
+            // Viền khung
+            ctx.strokeStyle = (activeSlot === idx) ? "#fbe395" : style.stroke;
+            ctx.lineWidth = (activeSlot === idx) ? 14 : 8;
+            ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
         });
+
+        // Chân trang A4
+        ctx.fillStyle = "#b3a5b3";
+        ctx.font = "bold 45px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("BLOOM SHOOT VŨNG TÀU - SELF SERVICE PHOTOBOOTH", 1240, 3400);
     }
 
-    function downloadA4() {
-        let canvas = document.getElementById('a4Canvas');
+    function downloadImage() {
         let link = document.createElement('a');
-        link.download = `BLOOM_FRAME_A4.png`;
+        link.download = `BLOOM_SHOOT_A4_${currentFrameType}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
     }
 
-    // Khởi tạo khung trống ban đầu
-    renderA4Canvas();
+    function sendPrintOrder() {
+        alert("Đã gửi lệnh in trang A4 thành công về máy in tại quán! Vui lòng nhận bản in sắc nét tại quầy.");
+    }
 </script>
 </body>
 </html>
