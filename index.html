@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BLOOM SHOOT - Khách Hàng Ghép Khung A4</title>
+    <title>BLOOM SHOOT - Ghép Khung A4</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; touch-action: manipulation; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: manipulation; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
@@ -17,12 +17,12 @@
         .frame-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 10px 4px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
         .frame-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        .upload-zone { border: 2px dashed #d4af37; padding: 15px; text-align: center; border-radius: 10px; background: #0b020a; cursor: pointer; }
+        .upload-zone { border: 2px dashed #d4af37; padding: 12px; text-align: center; border-radius: 10px; background: #0b020a; cursor: pointer; }
         .photo-grid { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
         .photo-thumb { width: 70px; height: 90px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .canvas-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; }
+        .canvas-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; position: relative; }
         canvas { width: 100%; display: block; touch-action: none; }
         
         .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
@@ -55,10 +55,18 @@
                 <button class="frame-btn" onclick="changeFrame('green_check', event)">🏁 Xanh Caro</button>
                 <button class="frame-btn" onclick="changeFrame('lilac_butterfly', event)">🦋 Tím Bướm</button>
             </div>
+            
+            <!-- Nút bấm upload ảnh khung PNG trực tiếp trên web khách -->
+            <div style="margin-top: 10px;">
+                <button onclick="document.getElementById('frameOverlayInput').click()" style="width: 100%; background: #2a0826; border: 1px dashed #d4af37; color: #fbe395; padding: 8px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold;">
+                    🖼️ Tải/Cập Nhật Ảnh Khung PNG Cho Mẫu Này
+                </button>
+                <input type="file" id="frameOverlayInput" accept="image/png" style="display:none;" onchange="uploadCustomFrameOverlay(this)">
+            </div>
         </div>
 
         <div class="section-box">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Lên:</label>
+            <label style="font-size: 12px; color: #fbe395; font-weight: bold;">2. Tải Ảnh Khách Lên:</label>
             <div class="upload-zone" onclick="document.getElementById('fileInput').click()" style="margin-top:5px;">
                 <span style="font-size: 12px; color: #fbe395;">📁 + Bấm chọn ảnh từ điện thoại</span>
                 <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
@@ -67,12 +75,12 @@
         </div>
 
         <div class="section-box" style="text-align:center;">
-            <label style="font-size: 12px; color: #fbe395; font-weight: bold;" id="activeSlotLabel">👇 Chạm trực tiếp vào Ô bất kỳ trên khung để chọn:</label>
+            <label style="font-size: 12px; color: #fbe395; font-weight: bold;" id="activeSlotLabel">👇 Chạm vào Ô bất kỳ trên khung để chọn:</label>
             <div class="canvas-container">
                 <canvas id="a4Canvas" width="2480" height="3508"></canvas>
             </div>
             <div class="edit-tools">
-                <button class="btn-tool" onclick="adjustZoom(-0.1)">🔍 Thu (-) </button>
+                <button class="btn-tool" onclick="adjustZoom(-0.1)">🔍 Thu (-)</button>
                 <button class="btn-tool" onclick="adjustZoom(0.1)">🔍 Phóng (+)</button>
                 <button class="btn-tool" onclick="rotateImage()">🔄 Xoay</button>
                 <button class="btn-tool" onclick="clearActiveSlot()" style="color:#ff6b81;">❌ Xóa Ô</button>
@@ -91,19 +99,19 @@
     let canvas, ctx;
     let frameOverlayImg = null;
 
-    // Bộ dữ liệu tọa độ mặc định chuẩn (Đề phòng trường hợp chưa có localStorage)
+    // Tọa độ các ô mặc định cho từng mẫu khung
     const defaultSlots = {
         'purple_dream': [
-            { "x": 180, "y": 350, "w": 1250, "h": 750 },
-            { "x": 1550, "y": 350, "w": 750, "h": 1850 },
-            { "x": 180, "y": 1200, "w": 600, "h": 750 },
-            { "x": 830, "y": 1200, "w": 600, "h": 750 },
-            { "x": 180, "y": 2050, "w": 1250, "h": 1150 },
-            { "x": 1550, "y": 2300, "w": 750, "h": 900 }
+            { "x": 180,  "y": 350,  "w": 1250, "h": 750  },
+            { "x": 1550, "y": 350,  "w": 750,  "h": 1850 },
+            { "x": 180,  "y": 1200, "w": 600,  "h": 750  },
+            { "x": 830,  "y": 1200, "w": 600,  "h": 750  },
+            { "x": 180,  "y": 2050, "w": 1250, "h": 1150 },
+            { "x": 1550, "y": 2300, "w": 750,  "h": 900  }
         ],
         'pink_ribbon': [
-            { "x": 180, "y": 350, "w": 2120, "h": 1500 },
-            { "x": 180, "y": 1950, "w": 2120, "h": 1400 }
+            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
+            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
         ],
         'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
     };
@@ -120,7 +128,7 @@
         document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
         if(event && event.target) event.target.classList.add('active');
         slotAssignments = {}; activeSlot = 0;
-        loadFrameImageAndRedraw();
+        loadFrameOverlay();
     }
 
     function handleUpload(input) {
@@ -152,11 +160,7 @@
         let savedData = JSON.parse(localStorage.getItem('BLOOM_ALL_FRAMES')) || {};
         let slots = savedData[currentFrameType] || defaultSlots[currentFrameType] || [];
         if(slots.length === 0) {
-            // Dự phòng mặc định nếu trống
-            slots = [
-                { "x": 180, "y": 300, "w": 2120, "h": 1000 },
-                { "x": 180, "y": 1400, "w": 2120, "h": 1000 }
-            ];
+            slots = defaultSlots['purple_dream'];
         }
         return slots;
     }
@@ -200,10 +204,10 @@
 
         canvas.addEventListener('touchend', () => { isDragging = false; });
         
-        loadFrameImageAndRedraw();
+        loadFrameOverlay();
     }
 
-    function loadFrameImageAndRedraw() {
+    function loadFrameOverlay() {
         if(!ctx) return;
         let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
         
@@ -221,6 +225,21 @@
             canvas.height = 3508;
             frameOverlayImg = null;
             redrawCanvas();
+        }
+    }
+
+    function uploadCustomFrameOverlay(input) {
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let base64 = e.target.result;
+                let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
+                savedImages[currentFrameType] = base64;
+                localStorage.setItem('BLOOM_ALL_IMAGES', JSON.stringify(savedImages));
+                loadFrameOverlay();
+                alert("Đã cập nhật ảnh khung PNG thành công trên web!");
+            }
+            reader.readAsDataURL(input.files[0]);
         }
     }
 
