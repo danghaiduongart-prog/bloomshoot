@@ -39,7 +39,7 @@
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
 
-        /* Giao diện Quản trị ẩn (Admin Edit Frame) chuẩn tỷ lệ gốc, không bị giãn */
+        /* Giao diện Quản trị ẩn (Admin Edit Frame) */
         #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; }
         .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
         .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -149,26 +149,32 @@
         'lilac_butterfly': ''
     };
 
+    const defaultFrames = {
+        'purple_dream': [
+            { "x": 180,  "y": 365,  "w": 589, "h": 698 },
+            { "x": 1550, "y": 350,  "w": 750, "h": 1850 }
+        ],
+        'pink_ribbon': [
+            { "x": 180,  "y": 150,  "w": 980,  "h": 1400 },
+            { "x": 1320, "y": 360,  "w": 980,  "h": 1400 },
+            { "x": 620,  "y": 1850, "w": 1250, "h": 1250 }
+        ],
+        'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
+    };
+
     function getStoredFrames() {
         let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V2');
-        if(saved) return JSON.parse(saved);
-        return {
-            'purple_dream': [
-                { "x": 180,  "y": 365,  "w": 589, "h": 698 },
-                { "x": 1550, "y": 350,  "w": 750, "h": 1850 }
-            ],
-            'pink_ribbon': [
-                { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
-                { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
-                { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
-            ],
-            'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
-        };
+        if(saved) {
+            try { return JSON.parse(saved); } catch(e) {}
+        }
+        return defaultFrames;
     }
 
     function getStoredImages() {
         let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V2');
-        if(saved) return JSON.parse(saved);
+        if(saved) {
+            try { return JSON.parse(saved); } catch(e) {}
+        }
         return {};
     }
 
