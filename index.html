@@ -91,7 +91,7 @@
     let canvas, ctx;
     let frameOverlayImg = null;
 
-    // Trỏ trực tiếp tới 4 file ảnh đã up lên kho GitHub của dự án
+    // Liên kết tên mẫu với các file ảnh khung trực tiếp trên GitHub
     const frameImageFiles = {
         'purple_dream': 'frame (4).png',
         'pink_ribbon': 'frame (2).png',
@@ -101,7 +101,8 @@
         'lilac_butterfly': ''
     };
 
-    const defaultSlots = {
+    // Tọa độ dự phòng chuẩn (nếu không lấy từ file edit fame)
+    const fallbackSlots = {
         'purple_dream': [
             { "x": 180,  "y": 350,  "w": 1250, "h": 750  },
             { "x": 1550, "y": 350,  "w": 750,  "h": 1850 },
@@ -111,16 +112,19 @@
             { "x": 1550, "y": 2300, "w": 750,  "h": 900  }
         ],
         'pink_ribbon': [
-            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
-            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
+            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
         ],
         'blue_star': [
-            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
-            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
+            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
         ], 
         'retro_sun': [
-            { "x": 180,  "y": 350,  "w": 2120, "h": 1500 },
-            { "x": 180,  "y": 1950, "w": 2120, "h": 1400 }
+            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
         ], 
         'green_check': [], 'lilac_butterfly': []
     };
@@ -166,9 +170,11 @@
     }
 
     function getCurrentSlots() {
-        let slots = defaultSlots[currentFrameType] || [];
+        // Ưu tiên lấy tọa độ anh vừa edit từ file quản trị sang, nếu không có thì lấy mặc định
+        let savedFramesData = JSON.parse(localStorage.getItem('BLOOM_ALL_FRAMES')) || {};
+        let slots = savedFramesData[currentFrameType] || fallbackSlots[currentFrameType] || [];
         if(slots.length === 0) {
-            slots = defaultSlots['purple_dream'];
+            slots = fallbackSlots['purple_dream'];
         }
         return slots;
     }
@@ -217,9 +223,11 @@
 
     function loadFrameOverlay() {
         if(!ctx) return;
-        let fileName = frameImageFiles[currentFrameType];
+        // Kiểm tra xem có ảnh khung custom từ tool edit fame đẩy sang không, nếu không lấy trên GitHub theo tên file
+        let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
+        let frameSrc = savedImages[currentFrameType] || frameImageFiles[currentFrameType];
         
-        if(fileName) {
+        if(frameSrc) {
             let fImg = new Image();
             fImg.onload = function() {
                 canvas.width = fImg.width;
@@ -233,7 +241,7 @@
                 frameOverlayImg = null;
                 redrawCanvas();
             };
-            fImg.src = fileName;
+            fImg.src = frameSrc;
         } else {
             canvas.width = 2480;
             canvas.height = 3508;
