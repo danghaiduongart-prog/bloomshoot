@@ -14,30 +14,30 @@
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
-        /* MÀN HÌNH CHỌN KHUNG (BƯỚC 1) */
+        /* MÀN HÌNH CHỌN KHUNG */
         #frameSelectScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; z-index: 90; display: none; flex-direction: column; padding: 20px; justify-content: center; align-items: center; }
         .frame-select-card { background: #1a0518; border: 2px solid #d4af37; border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; text-align: center; }
         .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
         .select-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 15px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
         .select-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        /* MÀN HÌNH CHÍNH (GHÉP ẢNH) */
-        .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 10px; padding-bottom: 70px; }
+        /* MÀN HÌNH CHÍNH (GỌN GÀNG, KHUNG ĐÃ THU NHỎ VỪA TẦM NHÌN) */
+        .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
         
-        .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 8px; min-height: 0; }
-        canvas { max-width: 100%; max-height: 100%; display: block; touch-action: none; object-fit: contain; }
+        .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; }
+        canvas { max-width: 75%; max-height: 75%; display: block; touch-action: none; object-fit: contain; transition: transform 0.3s ease; }
         
-        .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; flex-shrink: 0; }
+        .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; flex-shrink: 0; }
         .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 6px 2px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
 
-        .bottom-photo-bar { background: #1a0518; padding: 8px 10px; border-radius: 12px; border: 1px solid #2a0826; display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-bottom: 8px; }
-        .upload-btn-mini { background: #0b020a; border: 2px dashed #d4af37; color: #fbe395; width: 55px; height: 70px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+        .bottom-photo-bar { background: #1a0518; padding: 6px 8px; border-radius: 10px; border: 1px solid #2a0826; display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-bottom: 6px; }
+        .upload-btn-mini { background: #0b020a; border: 2px dashed #d4af37; color: #fbe395; width: 50px; height: 60px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; flex-shrink: 0; }
         .photo-grid { display: flex; gap: 6px; overflow-x: auto; flex: 1; padding: 2px 0; }
-        .photo-thumb { width: 55px; height: 70px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
+        .photo-thumb { width: 50px; height: 60px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.95); padding: 10px; display: flex; gap: 10px; border-top: 1px solid #2a0826; z-index: 50; }
-        .btn-action { flex: 1; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; text-align: center; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11,2,10,0.95); padding: 8px; display: flex; gap: 8px; border-top: 1px solid #2a0826; z-index: 50; }
+        .btn-action { flex: 1; padding: 10px; font-size: 12px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; text-align: center; }
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
 
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG & BẤM OK -->
+    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG -->
     <div id="frameSelectScreen">
         <div class="frame-select-card">
             <h3 style="color:#fbe395; margin-bottom:5px;">CHỌN MẪU KHUNG</h3>
@@ -88,9 +88,9 @@
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN CHÍNH GHÉP ẢNH & KHO ẢNH DƯỚI -->
+    <!-- 3. GIAO DIỆN CHÍNH -->
     <div class="main-app" id="mainApp">
-        <div class="canvas-container">
+        <div class="canvas-container" id="canvasContainer">
             <canvas id="a4Canvas" width="2480" height="3508"></canvas>
         </div>
 
@@ -104,11 +104,11 @@
         <div class="bottom-photo-bar">
             <div class="upload-btn-mini" onclick="document.getElementById('fileInput').click()">
                 <span>📁</span>
-                <span style="font-size: 9px; margin-top:2px;">Thêm</span>
+                <span style="font-size: 8px; margin-top:2px;">Thêm</span>
                 <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="handleUpload(this)">
             </div>
             <div class="photo-grid" id="photoGrid">
-                <span style="font-size:11px; color:#b3a5b3; line-height:70px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>
+                <span style="font-size:11px; color:#b3a5b3; line-height:60px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>
             </div>
         </div>
     </div>
@@ -123,7 +123,7 @@
     <div id="confirmModal">
         <div class="modal-card" id="modalStep1">
             <h3>XÁC NHẬN IN ẢNH?</h3>
-            <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy[cite: 6].</p>
+            <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy.</p>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
                 <button class="btn-action btn-print" onclick="generatePrintCode()">XÁC NHẬN</button>
@@ -131,7 +131,7 @@
         </div>
         <div class="modal-card" id="modalStep2" style="display:none;">
             <h3>🎉 ĐÃ CẤP MÃ IN THÀNH CÔNG!</h3>
-            <p>Đọc mã này cho nhân viên tại quầy để lấy ảnh nhé[cite: 6]!</p>
+            <p>Đọc mã này cho nhân viên tại quầy để lấy ảnh nhé!</p>
             <div class="print-code-box" id="displayPrintCode">XDG</div>
             <button class="btn-action btn-print" onclick="location.reload()" style="width:100%;">TẠO PHIÊN MỚI</button>
         </div>
@@ -256,7 +256,7 @@
         let grid = document.getElementById('photoGrid');
         grid.innerHTML = '';
         if(uploadedImages.length === 0) {
-            grid.innerHTML = `<span style="font-size:11px; color:#b3a5b3; line-height:70px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>`;
+            grid.innerHTML = `<span style="font-size:11px; color:#b3a5b3; line-height:60px; padding-left:5px;">Chưa có ảnh, bấm vào nút + để tải lên...</span>`;
             return;
         }
         uploadedImages.forEach((img, idx) => {
@@ -292,6 +292,7 @@
             currentSlots.forEach((slot, idx) => {
                 if(touchX >= slot.x && touchX <= slot.x + slot.w && touchY >= slot.y && touchY <= slot.y + slot.h) {
                     activeSlot = idx;
+                    updateCanvasFocus(); // Tự động zoom focus vào ô được chọn
                 }
             });
             isDragging = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
@@ -312,6 +313,27 @@
         loadFrameOverlay();
     }
 
+    // TÍNH TOÁN VÀ TỰ ĐỘNG FOCUS PHÓNG TO VÙNG Ô ĐANG CHỌN TRÊN MÀN HÌNH
+    function updateCanvasField() {}
+    function updateCanvasFocus() {
+        let currentSlots = getCurrentSlots();
+        let slot = currentSlots[activeSlot];
+        if(!slot) return;
+
+        let canvasEl = document.getElementById('a4Canvas');
+        // Tính toán tâm của ô và tỉ lệ phóng to thông minh
+        let scaleFactor = 2.2; // Phóng to gấp 2.2 lần vào ô
+        let centerX = slot.x + slot.w / 2;
+        let centerY = slot.y + slot.h / 2;
+        
+        // Dịch chuyển tâm canvas CSS transform origin vào đúng ô đang chọn
+        let originX = (centerX / canvas.width) * 100;
+        let originY = (centerY / canvas.height) * 100;
+        
+        canvasEl.style.transformOrigin = `${originX}% ${originY}%`;
+        canvasEl.style.transform = `scale(${scaleFactor})`;
+    }
+
     function loadFrameOverlay() {
         if(!ctx) return;
         let allImages = getStoredImages();
@@ -324,6 +346,7 @@
                 canvas.height = fImg.height;
                 frameOverlayImg = fImg;
                 redrawCanvas();
+                updateCanvasFocus();
             };
             fImg.onerror = function() {
                 canvas.width = 2480; canvas.height = 3508;
@@ -339,6 +362,7 @@
     function assignImageToSlot(img) {
         slotAssignments[activeSlot] = { img: img, scale: 1.0, rotation: 0, offsetX: 0, offsetY: 0 };
         redrawCanvas();
+        updateCanvasFocus();
     }
 
     function adjustZoom(amount) { if(slotAssignments[activeSlot]) { slotAssignments[activeSlot].scale = Math.max(0.4, slotAssignments[activeSlot].scale + amount); redrawCanvas(); } }
