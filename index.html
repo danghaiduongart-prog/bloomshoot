@@ -21,12 +21,11 @@
         .select-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 15px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
         .select-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        /* MÀN HÌNH CHÍNH - FIX HIỂN THỊ TRỌN VẸN KHUNG DỌC */
+        /* MÀN HÌNH CHÍNH - HIỂN THỊ FULL TRỌN VẸN KHUNG FAME */
         .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
         
         .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; width: 100%; }
         
-        /* Ép canvas hiển thị trọn vẹn, tự khớp tỉ lệ thật của ảnh frame PNG */
         canvas { 
             width: 100%; 
             height: 100%; 
@@ -512,7 +511,7 @@
                 adminFrameImg = null;
                 redrawAdmin();
             };
-            adminFrameImg.src = frameSrc;
+            img.src = frameSrc;
         } else {
             adminCanvas.width = 1240; adminCanvas.height = 1754;
             adminFrameImg = null;
