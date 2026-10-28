@@ -91,6 +91,23 @@
     let canvas, ctx;
     let frameOverlayImg = null;
 
+    // Bộ dữ liệu tọa độ mặc định chuẩn (Đề phòng trường hợp chưa có localStorage)
+    const defaultSlots = {
+        'purple_dream': [
+            { "x": 180, "y": 350, "w": 1250, "h": 750 },
+            { "x": 1550, "y": 350, "w": 750, "h": 1850 },
+            { "x": 180, "y": 1200, "w": 600, "h": 750 },
+            { "x": 830, "y": 1200, "w": 600, "h": 750 },
+            { "x": 180, "y": 2050, "w": 1250, "h": 1150 },
+            { "x": 1550, "y": 2300, "w": 750, "h": 900 }
+        ],
+        'pink_ribbon': [
+            { "x": 180, "y": 350, "w": 2120, "h": 1500 },
+            { "x": 180, "y": 1950, "w": 2120, "h": 1400 }
+        ],
+        'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
+    };
+
     function checkCode() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
@@ -133,12 +150,12 @@
 
     function getCurrentSlots() {
         let savedData = JSON.parse(localStorage.getItem('BLOOM_ALL_FRAMES')) || {};
-        let slots = savedData[currentFrameType] || [];
+        let slots = savedData[currentFrameType] || defaultSlots[currentFrameType] || [];
         if(slots.length === 0) {
+            // Dự phòng mặc định nếu trống
             slots = [
-                { "x": 180, "y": 300, "w": 2120, "h": 900 },
-                { "x": 180, "y": 1250, "w": 2120, "h": 900 },
-                { "x": 180, "y": 2200, "w": 2120, "h": 1100 }
+                { "x": 180, "y": 300, "w": 2120, "h": 1000 },
+                { "x": 180, "y": 1400, "w": 2120, "h": 1000 }
             ];
         }
         return slots;
@@ -150,10 +167,8 @@
         
         let isDragging = false, startX, startY;
 
-        // BẮT SỰ KIỆN CHẠM TRỰC TIẾP TRÊN KHUNG (CHUẨN XÁC TỈ LỆ CANVAS THỰC TẾ)
         canvas.addEventListener('touchstart', (e) => {
             let rect = canvas.getBoundingClientRect();
-            // Lấy tỷ lệ chính xác giữa kích thước thực trong bộ nhớ và kích thước hiển thị trên màn hình
             let scaleX = canvas.width / rect.width;
             let scaleY = canvas.height / rect.height;
             
@@ -226,7 +241,6 @@
         ctx.fillStyle = "#0b020a";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Vẽ các ảnh đã gán vào ô
         currentSlots.forEach((slot, idx) => {
             ctx.save();
             ctx.beginPath(); ctx.rect(slot.x, slot.y, slot.w, slot.h); ctx.clip();
@@ -250,13 +264,11 @@
             }
             ctx.restore();
 
-            // Viền ô: Ô đang chọn sẽ sáng vàng rõ rệt
             ctx.strokeStyle = (activeSlot === idx) ? "#ffea75" : "#d4af37";
             ctx.lineWidth = (activeSlot === idx) ? 16 : 6;
             ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
         });
 
-        // 2. Đè ảnh khung PNG lên trên cùng
         if(frameOverlayImg) {
             ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
         }
