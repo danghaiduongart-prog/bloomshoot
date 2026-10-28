@@ -43,7 +43,6 @@
         .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
         select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
-        textarea { width: 100%; height: 100px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 10px; padding: 8px; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -120,9 +119,7 @@
             <button class="btn-sub-admin" onclick="deleteAdminSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô Đang Chọn</button>
 
             <hr style="border-color:#2a0826; margin:15px 0;">
-            <button class="btn-admin" onclick="exportAdminCode()">📋 XUẤT CODE TỌA ĐỘ BẬC CAO</button>
-            <textarea id="adminOutputCode" placeholder="Bấm nút trên để lấy code dán vào GitHub..."></textarea>
-            <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:10px;">🔙 THOÁT</button>
+            <button class="btn-admin" onclick="saveAndExitAdmin()">💾 LƯU & THOÁT RA TRANG CHÍNH</button>
         </div>
         <div class="admin-canvas-box">
             <p style="font-size:12px; color:#d4af37; margin-bottom:5px;">🖱️ Nắm giữa ô để kéo đi | Kéo góc phải dưới để chỉnh kích thước</p>
@@ -144,22 +141,21 @@
         'lilac_butterfly': ''
     };
 
-    // TỌA ĐỘ MASTER ĐƯỢC NHÚNG THẲNG VÀO CODE (ĐIỆN THOẠI KHÁCH QUÉT MÃ ĐỌC TRỰC TIẾP TỪ ĐÂY)
-    let masterFrames = {
-        "purple_dream": [
-            { "x": 180, "y": 365, "w": 589, "h": 698 },
-            { "x": 1550, "y": 350, "w": 750, "h": 1850 }
+    const masterFrames = {
+        'purple_dream': [
+            { "x": 180,  "y": 365,  "w": 589, "h": 698 },
+            { "x": 1550, "y": 350,  "w": 750, "h": 1850 }
         ],
-        "pink_ribbon": [
-            { "x": 180, "y": 150, "w": 2120, "h": 1050 },
-            { "x": 180, "y": 1280, "w": 2120, "h": 1050 },
-            { "x": 180, "y": 2410, "w": 2120, "h": 950 }
+        'pink_ribbon': [
+            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
         ],
-        "blue_star": [], "retro_sun": [], "green_check": [], "lilac_butterfly": []
+        'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
     };
 
     function getStoredFrames() {
-        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V4');
+        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V3');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -167,7 +163,7 @@
     }
 
     function getStoredImages() {
-        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V4');
+        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V3');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -336,7 +332,6 @@
     }
     function sendPrintOrder() { alert("Đã gửi lệnh in thành công về máy quán!"); }
 
-    /* QUẢN TRỊ ADMIN */
     let adminCanvas, adminCtx;
     let adminFrameKey = 'purple_dream';
     let adminFrameImg = null;
@@ -397,12 +392,12 @@
             if (isAdminResizing) {
                 slot.w = Math.max(100, mouseX - slot.x);
                 slot.h = Math.max(100, mouseY - slot.y);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V4', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
                 redrawAdmin();
             } else if (isAdminDragging) {
                 slot.x = Math.round(mouseX - adminStartX);
                 slot.y = Math.round(mouseY - adminStartY);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V4', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
                 redrawAdmin();
             }
         };
@@ -439,7 +434,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V4', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V3', JSON.stringify(allImages));
                 switchAdminFrame(adminFrameKey);
             }
             reader.readAsDataURL(input.files[0]);
@@ -451,7 +446,7 @@
         if(!allFrames[adminFrameKey]) allFrames[adminFrameKey] = [];
         allFrames[adminFrameKey].push({ x: 200, y: 200, w: 600, h: 600 });
         adminActiveSlot = allFrames[adminFrameKey].length - 1;
-        localStorage.setItem('BLOOM_ALL_FRAMES_V4', JSON.stringify(allFrames));
+        localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
         redrawAdmin();
     }
 
@@ -461,7 +456,7 @@
         if (slots.length > 0) {
             slots.splice(adminActiveSlot, 1);
             adminActiveSlot = Math.max(0, slots.length - 1);
-            localStorage.setItem('BLOOM_ALL_FRAMES_V4', JSON.stringify(allFrames));
+            localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
             redrawAdmin();
         }
     }
@@ -492,12 +487,11 @@
         });
     }
 
-    function exportAdminCode() {
+    function saveAndExitAdmin() {
         let allFrames = getStoredFrames();
-        let codeStr = JSON.stringify(allFrames, null, 4);
-        document.getElementById('adminOutputCode').value = codeStr;
-        navigator.clipboard.writeText(codeStr);
-        alert("⚡ ĐÃ TỰ ĐỘNG COPY MÃ TỌA ĐỘ MỚI VÀO BỘ NHỚ! Anh chỉ cần dán đoạn này thay thế vào biến masterFrames trong code index.html rồi upload lên GitHub là điện thoại khách nhận diện chuẩn 100%!");
+        localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
+        alert("💾 ĐÃ LƯU TỌA ĐỘ VÀO BỘ NHỚ THÀNH CÔNG!");
+        location.reload();
     }
 </script>
 </body>
