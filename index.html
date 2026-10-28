@@ -41,7 +41,7 @@
         .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .admin-canvas-box canvas { width: 100%; max-width: 700px; height: auto; cursor: crosshair; object-fit: contain; border: 1px solid #2a0826; }
         .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; text-align: center; display: block; }
         select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
         textarea { width: 100%; height: 90px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 8px; padding: 8px; font-size: 11px; font-family: monospace; }
     </style>
@@ -144,7 +144,6 @@
         'lilac_butterfly': ''
     };
 
-    // TỌA ĐỘ MASTER CHUẨN XÁC
     let masterFrames = {
         "purple_dream": [
             { "x": 74, "y": 252, "w": 1069.3140046636088, "h": 1312.789593676705 },
@@ -433,6 +432,11 @@
                 adminCanvas.height = img.height;
                 redrawAdmin();
             }
+            img.onerror = function() {
+                adminCanvas.width = 2480; adminCanvas.height = 3508;
+                adminFrameImg = null;
+                redrawAdmin();
+            };
             img.src = frameSrc;
         } else {
             adminCanvas.width = 2480; adminCanvas.height = 3508;
@@ -441,6 +445,7 @@
         }
     }
 
+    // TỐI ƯU HÓA LẠI HÀM NÀY ĐỂ ÉP VẼ LẠI VÀ LƯU ẢNH LÊN TRÌNH DUYỆT LẬP TỨC
     function loadAdminBg(input) {
         if (input.files && input.files[0]) {
             let reader = new FileReader();
@@ -449,7 +454,16 @@
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
                 localStorage.setItem('BLOOM_ALL_IMAGES_V5', JSON.stringify(allImages));
-                switchAdminFrame(adminFrameKey);
+                
+                let img = new Image();
+                img.onload = function() {
+                    adminFrameImg = img;
+                    adminCanvas.width = img.width;
+                    adminCanvas.height = img.height;
+                    redrawAdmin();
+                    alert("✅ Đã tải và hiển thị khung thành công cho mẫu này!");
+                }
+                img.src = base64Image;
             }
             reader.readAsDataURL(input.files[0]);
         }
