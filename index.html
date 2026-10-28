@@ -144,29 +144,87 @@
         'lilac_butterfly': ''
     };
 
+    // ĐÃ NHÚNG TỌA ĐỘ MASTER MỚI NHẤT CỦA DƯƠNG VÀO ĐÂY
     let masterFrames = {
         "purple_dream": [
-            { "x": 74, "y": 252, "w": 1069.3140046636088, "h": 1312.789593676705 },
-            { "x": 1231, "y": 151, "w": 1057.4567619579416, "h": 1427.5178253182698 }
+            {
+                "x": 74,
+                "y": 252,
+                "w": 1069.3140046636088,
+                "h": 1312.789593676705
+            },
+            {
+                "x": 1231,
+                "y": 151,
+                "w": 1057.4567619579416,
+                "h": 1427.5178253182698
+            }
         ],
         "pink_ribbon": [
-            { "x": 180, "y": 1280, "w": 2120, "h": 1050 },
-            { "x": 180, "y": 2410, "w": 2120, "h": 950 },
-            { "x": 22, "y": 22, "w": 460.9999651227679, "h": 320.0423973845026 }
+            {
+                "x": 180,
+                "y": 2410,
+                "w": 2120,
+                "h": 950
+            },
+            {
+                "x": 22,
+                "y": 22,
+                "w": 460.9999651227679,
+                "h": 320.0423973845026
+            },
+            {
+                "x": 35,
+                "y": 361,
+                "w": 436.57139369419644,
+                "h": 320.6488011079034
+            },
+            {
+                "x": 33,
+                "y": 709,
+                "w": 439.9999651227679,
+                "h": 310.67898296356566
+            },
+            {
+                "x": 31,
+                "y": 1047,
+                "w": 445.57139369419644,
+                "h": 325.8983016041493
+            }
         ],
         "blue_star": [],
         "retro_sun": [
-            { "x": 90, "y": 100, "w": 1014.3427734375, "h": 770.768010472065 },
-            { "x": 80, "y": 933, "w": 1041.485630580357, "h": 764.8600620718414 },
-            { "x": 85, "y": 1759, "w": 1036.485630580357, "h": 784.5230204214713 },
-            { "x": 77, "y": 2593, "w": 1039.3427734375, "h": 763.8588632628316 }
+            {
+                "x": 90,
+                "y": 100,
+                "w": 1014.3427734375,
+                "h": 770.768010472065
+            },
+            {
+                "x": 80,
+                "y": 933,
+                "w": 1041.485630580357,
+                "h": 764.8600620718414
+            },
+            {
+                "x": 85,
+                "y": 1759,
+                "w": 1036.485630580357,
+                "h": 784.5230204214713
+            },
+            {
+                "x": 77,
+                "y": 2593,
+                "w": 1039.3427734375,
+                "h": 763.8588632628316
+            }
         ],
         "green_check": [],
         "lilac_butterfly": []
     };
 
     function getStoredFrames() {
-        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V5');
+        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V6');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -174,7 +232,7 @@
     }
 
     function getStoredImages() {
-        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V5');
+        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V6');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -404,12 +462,12 @@
             if (isAdminResizing) {
                 slot.w = Math.max(100, mouseX - slot.x);
                 slot.h = Math.max(100, mouseY - slot.y);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V5', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V6', JSON.stringify(allFrames));
                 redrawAdmin();
             } else if (isAdminDragging) {
                 slot.x = Math.round(mouseX - adminStartX);
                 slot.y = Math.round(mouseY - adminStartY);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V5', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V6', JSON.stringify(allFrames));
                 redrawAdmin();
             }
         };
@@ -445,7 +503,6 @@
         }
     }
 
-    // TỐI ƯU HÓA LẠI HÀM NÀY ĐỂ ÉP VẼ LẠI VÀ LƯU ẢNH LÊN TRÌNH DUYỆT LẬP TỨC
     function loadAdminBg(input) {
         if (input.files && input.files[0]) {
             let reader = new FileReader();
@@ -453,7 +510,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V5', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V6', JSON.stringify(allImages));
                 
                 let img = new Image();
                 img.onload = function() {
@@ -474,7 +531,7 @@
         if(!allFrames[adminFrameKey]) allFrames[adminFrameKey] = [];
         allFrames[adminFrameKey].push({ x: 200, y: 200, w: 600, h: 600 });
         adminActiveSlot = allFrames[adminFrameKey].length - 1;
-        localStorage.setItem('BLOOM_ALL_FRAMES_V5', JSON.stringify(allFrames));
+        localStorage.setItem('BLOOM_ALL_FRAMES_V6', JSON.stringify(allFrames));
         redrawAdmin();
     }
 
@@ -484,7 +541,7 @@
         if (slots.length > 0) {
             slots.splice(adminActiveSlot, 1);
             adminActiveSlot = Math.max(0, slots.length - 1);
-            localStorage.setItem('BLOOM_ALL_FRAMES_V5', JSON.stringify(allFrames));
+            localStorage.setItem('BLOOM_ALL_FRAMES_V6', JSON.stringify(allFrames));
             redrawAdmin();
         }
     }
