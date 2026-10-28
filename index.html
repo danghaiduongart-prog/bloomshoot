@@ -8,15 +8,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: manipulation; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        /* Nút Cài đặt bí mật góc trên bên phải */
         #settingsBtn { position: fixed; top: 10px; right: 10px; background: rgba(26,5,24,0.8); border: 1px solid #d4af37; color: #fbe395; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; }
         
-        /* Giao diện Đăng nhập khách */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
-        /* Ứng dụng chính cho khách */
         .main-app { display: none; width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
         .section-box { background: #1a0518; padding: 15px; border-radius: 16px; border: 1px solid #2a0826; margin-bottom: 15px; }
         .frame-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
@@ -39,22 +36,19 @@
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
 
-        /* Giao diện Quản trị ẩn (Admin Edit Frame) */
         #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; }
         .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
         .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .admin-canvas-box canvas { width: 100%; max-width: 700px; height: auto; cursor: crosshair; object-fit: contain; border: 1px solid #2a0826; }
-        .btn-admin { background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
         select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Nút Cài đặt bí mật góc trên bên phải -->
     <button id="settingsBtn" onclick="openAdmin()">⚙️</button>
 
-    <!-- MÀN HÌNH KHÁCH: NHẬP MÃ IN -->
     <div id="loginScreen">
         <div class="login-card">
             <h2 style="color:#fbe395">BLOOM SHOOT</h2>
@@ -63,7 +57,6 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH KHÁCH: GHÉP ẢNH -->
     <div class="main-app" id="mainApp">
         <div class="section-box">
             <label style="font-size: 12px; color: #fbe395; font-weight: bold;">1. Chọn Mẫu Khung A4:</label>
@@ -106,7 +99,6 @@
         <button class="btn-action btn-print" onclick="sendPrintOrder()">🖨️ GỬI IN</button>
     </div>
 
-    <!-- MÀN HÌNH QUẢN TRỊ BÍ MẬT (ADMIN PANEL) -->
     <div id="adminPanel">
         <div class="admin-sidebar">
             <h3 style="color:#fbe395; margin-bottom:10px;">🛠️ TRANG QUẢN TRỊ KHUNG</h3>
@@ -149,29 +141,30 @@
         'lilac_butterfly': ''
     };
 
-    const defaultFrames = {
+    // TỌA ĐỘ CỐ ĐỊNH CHUẨN XÁC TRỰC TIẾP TRONG CODE (Không phụ thuộc localStorage, điện thoại nào quét cũng chuẩn 100%)
+    const masterFrames = {
         'purple_dream': [
             { "x": 180,  "y": 365,  "w": 589, "h": 698 },
             { "x": 1550, "y": 350,  "w": 750, "h": 1850 }
         ],
         'pink_ribbon': [
-            { "x": 180,  "y": 150,  "w": 980,  "h": 1400 },
-            { "x": 1320, "y": 360,  "w": 980,  "h": 1400 },
-            { "x": 620,  "y": 1850, "w": 1250, "h": 1250 }
+            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
         ],
         'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
     };
 
     function getStoredFrames() {
-        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V2');
+        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V3');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
-        return defaultFrames;
+        return masterFrames;
     }
 
     function getStoredImages() {
-        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V2');
+        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V3');
         if(saved) {
             try { return JSON.parse(saved); } catch(e) {}
         }
@@ -340,8 +333,6 @@
     }
     function sendPrintOrder() { alert("Đã gửi lệnh in thành công về máy quán!"); }
 
-
-    /* --- LOGIC TRANG QUẢN TRỊ BÍ MẬT (ADMIN PANEL) --- */
     let adminCanvas, adminCtx;
     let adminFrameKey = 'purple_dream';
     let adminFrameImg = null;
@@ -402,12 +393,12 @@
             if (isAdminResizing) {
                 slot.w = Math.max(100, mouseX - slot.x);
                 slot.h = Math.max(100, mouseY - slot.y);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
                 redrawAdmin();
             } else if (isAdminDragging) {
                 slot.x = Math.round(mouseX - adminStartX);
                 slot.y = Math.round(mouseY - adminStartY);
-                localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+                localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
                 redrawAdmin();
             }
         };
@@ -444,7 +435,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V2', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V3', JSON.stringify(allImages));
                 switchAdminFrame(adminFrameKey);
             }
             reader.readAsDataURL(input.files[0]);
@@ -456,7 +447,7 @@
         if(!allFrames[adminFrameKey]) allFrames[adminFrameKey] = [];
         allFrames[adminFrameKey].push({ x: 200, y: 200, w: 600, h: 600 });
         adminActiveSlot = allFrames[adminFrameKey].length - 1;
-        localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+        localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
         redrawAdmin();
     }
 
@@ -466,7 +457,7 @@
         if (slots.length > 0) {
             slots.splice(adminActiveSlot, 1);
             adminActiveSlot = Math.max(0, slots.length - 1);
-            localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+            localStorage.setItem('BLOOM_ALL_FRAMES_V3', JSON.stringify(allFrames));
             redrawAdmin();
         }
     }
