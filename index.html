@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BLOOM SHOOT - Ghép Khung A4</title>
+    <title>BLOOM SHOOT - Photobooth</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: manipulation; }
         body { background: #0b020a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Nút Cài đặt bí mật góc trên bên phải */
+        #settingsBtn { position: fixed; top: 10px; right: 10px; background: rgba(26,5,24,0.8); border: 1px solid #d4af37; color: #fbe395; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; }
+        
+        /* Giao diện Đăng nhập khách */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
+        /* Ứng dụng chính cho khách */
         .main-app { display: none; width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
         .section-box { background: #1a0518; padding: 15px; border-radius: 16px; border: 1px solid #2a0826; margin-bottom: 15px; }
         .frame-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
@@ -22,8 +28,8 @@
         .photo-thumb { width: 70px; height: 90px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #000; position: relative; cursor: pointer; border: 2px solid transparent; }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .canvas-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; position: relative; }
-        canvas { width: 100%; display: block; touch-action: none; }
+        .canvas-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; margin-top: 10px; position: relative; display: flex; justify-content: center; align-items: center; }
+        canvas { width: 100%; height: auto; display: block; touch-action: none; object-fit: contain; }
         
         .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
         .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 10px 2px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
@@ -32,10 +38,23 @@
         .btn-action { flex: 1; padding: 14px; font-size: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
         .btn-print { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; }
         .btn-download { background: #1a0518; color: #fbe395; border: 1px solid #d4af37; }
+
+        /* Giao diện Quản trị ẩn (Admin Edit Frame) chuẩn tỷ lệ gốc, không bị giãn */
+        #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; }
+        .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
+        .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .admin-canvas-box canvas { width: 100%; max-width: 700px; height: auto; cursor: crosshair; object-fit: contain; border: 1px solid #2a0826; }
+        .btn-admin { background: linear-gradient(135deg, #d4af37, #fbe395); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- Nút Cài đặt bí mật góc trên bên phải -->
+    <button id="settingsBtn" onclick="openAdmin()">⚙️</button>
+
+    <!-- MÀN HÌNH KHÁCH: NHẬP MÃ IN -->
     <div id="loginScreen">
         <div class="login-card">
             <h2 style="color:#fbe395">BLOOM SHOOT</h2>
@@ -44,6 +63,7 @@
         </div>
     </div>
 
+    <!-- MÀN HÌNH KHÁCH: GHÉP ẢNH -->
     <div class="main-app" id="mainApp">
         <div class="section-box">
             <label style="font-size: 12px; color: #fbe395; font-weight: bold;">1. Chọn Mẫu Khung A4:</label>
@@ -86,12 +106,40 @@
         <button class="btn-action btn-print" onclick="sendPrintOrder()">🖨️ GỬI IN</button>
     </div>
 
+    <!-- MÀN HÌNH QUẢN TRỊ BÍ MẬT (ADMIN PANEL) -->
+    <div id="adminPanel">
+        <div class="admin-sidebar">
+            <h3 style="color:#fbe395; margin-bottom:10px;">🛠️ TRANG QUẢN TRỊ KHUNG</h3>
+            <label style="font-size:12px; color:#b3a5b3;">Chọn mẫu khung chỉnh sửa:</label>
+            <select id="adminFrameSelect" onchange="switchAdminFrame(this.value)">
+                <option value="purple_dream">🔮 Tím Mộng Mơ</option>
+                <option value="pink_ribbon">🎀 Hồng Nơ</option>
+                <option value="blue_star">⭐ Xanh Sao</option>
+                <option value="retro_sun">🌻 Retro Sọc</option>
+                <option value="green_check">🏁 Xanh Caro</option>
+                <option value="lilac_butterfly">🦋 Tím Bướm</option>
+            </select>
+
+            <button class="btn-sub-admin" onclick="document.getElementById('adminImgInput').click()">🖼️ Tải Ảnh Khung PNG</button>
+            <input type="file" id="adminImgInput" accept="image/*" style="display:none" onchange="loadAdminBg(this)">
+
+            <button class="btn-sub-admin" onclick="addAdminSlot()" style="margin-top:15px;">➕ Thêm Ô Mới</button>
+            <button class="btn-sub-admin" onclick="deleteAdminSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô Đang Chọn</button>
+
+            <hr style="border-color:#2a0826; margin:15px 0;">
+            <button class="btn-admin" onclick="saveAndExitAdmin()">💾 LƯU & THOÁT RA TRANG CHÍNH</button>
+        </div>
+        <div class="admin-canvas-box">
+            <p style="font-size:12px; color:#d4af37; margin-bottom:5px;">🖱️ Nắm giữa ô để kéo đi | Kéo góc phải dưới để chỉnh kích thước</p>
+            <canvas id="adminCanvas" width="2480" height="3508"></canvas>
+        </div>
+    </div>
+
 <script>
     let uploadedImages = [], slotAssignments = {}, activeSlot = 0, currentFrameType = 'purple_dream';
     let canvas, ctx;
     let frameOverlayImg = null;
 
-    // Liên kết tên mẫu với các file ảnh khung trực tiếp trên GitHub
     const frameImageFiles = {
         'purple_dream': 'frame (4).png',
         'pink_ribbon': 'frame (2).png',
@@ -101,33 +149,28 @@
         'lilac_butterfly': ''
     };
 
-    // Tọa độ dự phòng chuẩn (nếu không lấy từ file edit fame)
-    const fallbackSlots = {
-        'purple_dream': [
-            { "x": 180,  "y": 350,  "w": 1250, "h": 750  },
-            { "x": 1550, "y": 350,  "w": 750,  "h": 1850 },
-            { "x": 180,  "y": 1200, "w": 600,  "h": 750  },
-            { "x": 830,  "y": 1200, "w": 600,  "h": 750  },
-            { "x": 180,  "y": 2050, "w": 1250, "h": 1150 },
-            { "x": 1550, "y": 2300, "w": 750,  "h": 900  }
-        ],
-        'pink_ribbon': [
-            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
-        ],
-        'blue_star': [
-            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
-        ], 
-        'retro_sun': [
-            { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
-            { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
-        ], 
-        'green_check': [], 'lilac_butterfly': []
-    };
+    function getStoredFrames() {
+        let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V2');
+        if(saved) return JSON.parse(saved);
+        return {
+            'purple_dream': [
+                { "x": 180,  "y": 365,  "w": 589, "h": 698 },
+                { "x": 1550, "y": 350,  "w": 750, "h": 1850 }
+            ],
+            'pink_ribbon': [
+                { "x": 180,  "y": 150,  "w": 2120, "h": 1050 },
+                { "x": 180,  "y": 1280, "w": 2120, "h": 1050 },
+                { "x": 180,  "y": 2410, "w": 2120, "h": 950  }
+            ],
+            'blue_star': [], 'retro_sun': [], 'green_check': [], 'lilac_butterfly': []
+        };
+    }
+
+    function getStoredImages() {
+        let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V2');
+        if(saved) return JSON.parse(saved);
+        return {};
+    }
 
     function checkCode() {
         document.getElementById('loginScreen').style.display = 'none';
@@ -170,12 +213,9 @@
     }
 
     function getCurrentSlots() {
-        // Ưu tiên lấy tọa độ anh vừa edit từ file quản trị sang, nếu không có thì lấy mặc định
-        let savedFramesData = JSON.parse(localStorage.getItem('BLOOM_ALL_FRAMES')) || {};
-        let slots = savedFramesData[currentFrameType] || fallbackSlots[currentFrameType] || [];
-        if(slots.length === 0) {
-            slots = fallbackSlots['purple_dream'];
-        }
+        let allFrames = getStoredFrames();
+        let slots = allFrames[currentFrameType] || [];
+        if(slots.length === 0) slots = allFrames['purple_dream'] || [];
         return slots;
     }
 
@@ -189,10 +229,8 @@
             let rect = canvas.getBoundingClientRect();
             let scaleX = canvas.width / rect.width;
             let scaleY = canvas.height / rect.height;
-            
             let touchX = (e.touches[0].clientX - rect.left) * scaleX;
             let touchY = (e.touches[0].clientY - rect.top) * scaleY;
-            
             let currentSlots = getCurrentSlots();
 
             currentSlots.forEach((slot, idx) => {
@@ -209,7 +247,6 @@
             if(!isDragging || !slotAssignments[activeSlot]) return;
             let rect = canvas.getBoundingClientRect();
             let scaleX = canvas.width / rect.width;
-            
             slotAssignments[activeSlot].offsetX += (e.touches[0].clientX - startX) * scaleX * 1.2;
             slotAssignments[activeSlot].offsetY += (e.touches[0].clientY - startY) * scaleX * 1.2;
             startX = e.touches[0].clientX; startY = e.touches[0].clientY;
@@ -217,15 +254,13 @@
         });
 
         canvas.addEventListener('touchend', () => { isDragging = false; });
-        
         loadFrameOverlay();
     }
 
     function loadFrameOverlay() {
         if(!ctx) return;
-        // Kiểm tra xem có ảnh khung custom từ tool edit fame đẩy sang không, nếu không lấy trên GitHub theo tên file
-        let savedImages = JSON.parse(localStorage.getItem('BLOOM_ALL_IMAGES')) || {};
-        let frameSrc = savedImages[currentFrameType] || frameImageFiles[currentFrameType];
+        let allImages = getStoredImages();
+        let frameSrc = allImages[currentFrameType] || frameImageFiles[currentFrameType];
         
         if(frameSrc) {
             let fImg = new Image();
@@ -236,17 +271,13 @@
                 redrawCanvas();
             };
             fImg.onerror = function() {
-                canvas.width = 2480;
-                canvas.height = 3508;
-                frameOverlayImg = null;
-                redrawCanvas();
+                canvas.width = 2480; canvas.height = 3508;
+                frameOverlayImg = null; redrawCanvas();
             };
             fImg.src = frameSrc;
         } else {
-            canvas.width = 2480;
-            canvas.height = 3508;
-            frameOverlayImg = null;
-            redrawCanvas();
+            canvas.width = 2480; canvas.height = 3508;
+            frameOverlayImg = null; redrawCanvas();
         }
     }
 
@@ -262,9 +293,7 @@
     function redrawCanvas() {
         if(!ctx) return;
         let currentSlots = getCurrentSlots();
-
-        ctx.fillStyle = "#0b020a";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0b020a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         currentSlots.forEach((slot, idx) => {
             ctx.save();
@@ -294,9 +323,7 @@
             ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
         });
 
-        if(frameOverlayImg) {
-            ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
-        }
+        if(frameOverlayImg) ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
     }
 
     function downloadImage() {
@@ -306,6 +333,168 @@
         link.click();
     }
     function sendPrintOrder() { alert("Đã gửi lệnh in thành công về máy quán!"); }
+
+
+    /* --- LOGIC TRANG QUẢN TRỊ BÍ MẬT (ADMIN PANEL) --- */
+    let adminCanvas, adminCtx;
+    let adminFrameKey = 'purple_dream';
+    let adminFrameImg = null;
+    let adminActiveSlot = 0;
+    let isAdminDragging = false, isAdminResizing = false;
+    let adminStartX, adminStartY;
+    const ADMIN_HANDLE = 40;
+
+    function openAdmin() {
+        let pwd = prompt("Nhập mật khẩu quản trị:");
+        if (pwd === "1111") {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('bottomBar').style.display = 'none';
+            document.getElementById('settingsBtn').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'flex';
+            initAdminCanvas();
+        } else if (pwd !== null) {
+            alert("Sai mật khẩu!");
+        }
+    }
+
+    function initAdminCanvas() {
+        adminCanvas = document.getElementById('adminCanvas');
+        adminCtx = adminCanvas.getContext('2d');
+        switchAdminFrame('purple_dream');
+
+        adminCanvas.onmousedown = (e) => {
+            let rect = adminCanvas.getBoundingClientRect();
+            let scaleX = adminCanvas.width / rect.width, scaleY = adminCanvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX, mouseY = (e.clientY - rect.top) * scaleY;
+            let allFrames = getStoredFrames();
+            let slots = allFrames[adminFrameKey] || [];
+            let slot = slots[adminActiveSlot];
+
+            if (slot && Math.abs(mouseX - (slot.x + slot.w)) < ADMIN_HANDLE && Math.abs(mouseY - (slot.y + slot.h)) < ADMIN_HANDLE) {
+                isAdminResizing = true; return;
+            }
+
+            slots.forEach((s, idx) => {
+                if (mouseX >= s.x && mouseX <= s.x + s.w && mouseY >= s.y && mouseY <= s.y + s.h) {
+                    adminActiveSlot = idx; isAdminDragging = true;
+                    adminStartX = mouseX - s.x; adminStartY = mouseY - s.y;
+                }
+            });
+            redrawAdmin();
+        };
+
+        adminCanvas.onmousemove = (e) => {
+            let rect = adminCanvas.getBoundingClientRect();
+            let scaleX = adminCanvas.width / rect.width, scaleY = adminCanvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX, mouseY = (e.clientY - rect.top) * scaleY;
+            let allFrames = getStoredFrames();
+            let slots = allFrames[adminFrameKey] || [];
+            let slot = slots[adminActiveSlot];
+            if (!slot) return;
+
+            if (isAdminResizing) {
+                slot.w = Math.max(100, mouseX - slot.x);
+                slot.h = Math.max(100, mouseY - slot.y);
+                localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+                redrawAdmin();
+            } else if (isAdminDragging) {
+                slot.x = Math.round(mouseX - adminStartX);
+                slot.y = Math.round(mouseY - adminStartY);
+                localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+                redrawAdmin();
+            }
+        };
+
+        window.onmouseup = () => { isAdminDragging = false; isAdminResizing = false; };
+    }
+
+    function switchAdminFrame(key) {
+        adminFrameKey = key;
+        adminActiveSlot = 0;
+        adminFrameImg = null;
+        let allImages = getStoredImages();
+        let frameSrc = allImages[key] || frameImageFiles[key];
+
+        if (frameSrc) {
+            let img = new Image();
+            img.onload = function() {
+                adminFrameImg = img;
+                adminCanvas.width = img.width;
+                adminCanvas.height = img.height;
+                redrawAdmin();
+            }
+            img.src = frameSrc;
+        } else {
+            adminCanvas.width = 2480; adminCanvas.height = 3508;
+            redrawAdmin();
+        }
+    }
+
+    function loadAdminBg(input) {
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let base64Image = e.target.result;
+                let allImages = getStoredImages();
+                allImages[adminFrameKey] = base64Image;
+                localStorage.setItem('BLOOM_ALL_IMAGES_V2', JSON.stringify(allImages));
+                switchAdminFrame(adminFrameKey);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function addAdminSlot() {
+        let allFrames = getStoredFrames();
+        if(!allFrames[adminFrameKey]) allFrames[adminFrameKey] = [];
+        allFrames[adminFrameKey].push({ x: 200, y: 200, w: 600, h: 600 });
+        adminActiveSlot = allFrames[adminFrameKey].length - 1;
+        localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+        redrawAdmin();
+    }
+
+    function deleteAdminSlot() {
+        let allFrames = getStoredFrames();
+        let slots = allFrames[adminFrameKey] || [];
+        if (slots.length > 0) {
+            slots.splice(adminActiveSlot, 1);
+            adminActiveSlot = Math.max(0, slots.length - 1);
+            localStorage.setItem('BLOOM_ALL_FRAMES_V2', JSON.stringify(allFrames));
+            redrawAdmin();
+        }
+    }
+
+    function redrawAdmin() {
+        if(!adminCtx) return;
+        adminCtx.clearRect(0, 0, adminCanvas.width, adminCanvas.height);
+        adminCtx.fillStyle = "#0b020a"; adminCtx.fillRect(0, 0, adminCanvas.width, adminCanvas.height);
+        if (adminFrameImg) adminCtx.drawImage(adminFrameImg, 0, 0, adminCanvas.width, adminCanvas.height);
+
+        let allFrames = getStoredFrames();
+        let slots = allFrames[adminFrameKey] || [];
+        slots.forEach((slot, idx) => {
+            let isActive = (idx === adminActiveSlot);
+            adminCtx.fillStyle = isActive ? "rgba(212, 175, 55, 0.3)" : "rgba(42, 8, 38, 0.6)";
+            adminCtx.fillRect(slot.x, slot.y, slot.w, slot.h);
+            adminCtx.strokeStyle = isActive ? "#fbe395" : "#ff6b81";
+            adminCtx.lineWidth = isActive ? 10 : 5;
+            adminCtx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+
+            adminCtx.fillStyle = "#fff"; adminCtx.font = "bold 60px sans-serif"; adminCtx.textAlign = "center";
+            adminCtx.fillText(`Ô #${idx + 1}`, slot.x + slot.w / 2, slot.y + slot.h / 2);
+
+            if (isActive) {
+                adminCtx.fillStyle = "#d4af37";
+                adminCtx.fillRect(slot.x + slot.w - ADMIN_HANDLE/2, slot.y + slot.h - ADMIN_HANDLE/2, ADMIN_HANDLE, ADMIN_HANDLE);
+            }
+        });
+    }
+
+    function saveAndExitAdmin() {
+        alert("💾 ĐÃ LƯU TỌA ĐỘ VÀ KHUNG THÀNH CÔNG!");
+        location.reload();
+    }
 </script>
 </body>
 </html>
