@@ -14,7 +14,7 @@
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
-        /* MÀN HÌNH CHỌN KHUNG DẠNG CARDS PREVIEW NHƯ RED BUTTON */
+        /* MÀN HÌNH CHỌN KHUNG DẠNG THẺ PREVIEW (RED BUTTON STYLE) */
         #frameSelectScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; z-index: 90; display: none; flex-direction: column; padding: 15px; align-items: center; }
         .frame-select-container { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; }
         .frame-header { text-align: center; margin-bottom: 12px; flex-shrink: 0; }
@@ -32,7 +32,7 @@
 
         .btn-confirm-frame { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 30px; border: none; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); flex-shrink: 0; }
 
-        /* MÀN HÌNH CHÍNH NHƯ CŨ */
+        /* MÀN HÌNH CHÍNH (KHÁCH GHÉP ẢNH) */
         .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
         .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; width: 100%; }
         
@@ -59,15 +59,15 @@
         .modal-card p { font-size: 13px; color: #b3a5b3; margin-bottom: 20px; line-height: 1.5; }
         .print-code-box { background: #0b020a; border: 2px dashed #d4af37; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 32px; font-weight: bold; color: #fbe395; letter-spacing: 4px; }
 
-        /* TRANG QUẢN TRỊ ADMIN / QUẦY IN */
-        #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; height: 100vh; overflow-y: auto; }
-        .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 350px; text-align: left; height: fit-content; }
-        .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .admin-canvas-box canvas { width: 100%; max-width: 600px; height: auto; object-fit: contain; border: 1px solid #2a0826; }
+        /* TRANG QUẢN TRỊ ADMIN / QUẦY IN - TỐI ƯU CHO MÁY TÍNH (DESKTOP) */
+        #adminPanel { display: none; width: 100vw; height: 100vh; background: #0b020a; padding: 20px; gap: 20px; justify-content: center; align-items: center; overflow: hidden; }
+        .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 20px; width: 360px; height: 92vh; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+        .admin-canvas-box { flex: 1; height: 92vh; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        .admin-canvas-box canvas { max-width: 100%; max-height: 75vh; width: auto !important; height: auto !important; object-fit: contain; border: 1px solid #2a0826; background: #111; }
         .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; text-align: center; display: block; }
-        select, input[type="text"] { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
-        textarea { width: 100%; height: 90px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 8px; padding: 8px; font-size: 11px; font-family: monospace; }
+        .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; text-align: center; display: block; }
+        select, input[type="text"] { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 8px 0; font-weight: bold; }
+        textarea { width: 100%; height: 80px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 6px; padding: 8px; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -91,9 +91,7 @@
                 <p>Chạm vào mẫu khung bạn muốn chọn để bắt đầu ghép ảnh</p>
             </div>
             
-            <div class="frame-grid-scroll" id="frameGridScroll">
-                <!-- Danh sách khung sẽ được tạo tự động bằng JS -->
-            </div>
+            <div class="frame-grid-scroll" id="frameGridScroll"></div>
 
             <button class="btn-confirm-frame" onclick="startMainApp()">BẮT ĐẦU GHÉP ÁNH ✨</button>
         </div>
@@ -148,17 +146,16 @@
         </div>
     </div>
 
-    <!-- 4. TRANG QUẢN TRỊ ADMIN / QUẦY IN -->
+    <!-- 4. TRANG QUẢN TRỊ ADMIN / QUẦY IN (TỐI ƯU MÁY TÍNH) -->
     <div id="adminPanel">
         <div class="admin-sidebar">
-            <h3 style="color:#fbe395; margin-bottom:10px;">🖨️ TAB QUẦY THU NGÂN / IN ẢNH</h3>
-            <p style="font-size:12px; color:#b3a5b3; margin-bottom:10px;">Nhập mã in của khách đọc để tải ảnh:</p>
+            <h3 style="color:#fbe395; margin-bottom:10px;">🖨️ QUẦY IN & QUẢN TRỊ KHUNG</h3>
+            <p style="font-size:11px; color:#b3a5b3; margin-bottom:8px;">Nhập mã in của khách đọc:</p>
+            <input type="text" id="inputSearchCode" placeholder="Nhập mã (Ví dụ: XDG)" style="text-transform:uppercase;" maxlength="3">
+            <button class="btn-admin" onclick="searchPrintOrder()" style="margin-top:4px;">🔍 TÌM ẢNH KHÁCH</button>
             
-            <input type="text" id="inputSearchCode" placeholder="Nhập mã in (Ví dụ: XDG)" style="text-transform:uppercase;" maxlength="3">
-            <button class="btn-admin" onclick="searchPrintOrder()">🔍 TÌM ẢNH KHÁCH</button>
-            
-            <hr style="border-color:#2a0826; margin:15px 0;">
-            <h4 style="color:#fbe395; font-size:13px; margin-bottom:8px;">🛠️ Quản Trị Tọa Độ Khung:</h4>
+            <hr style="border-color:#2a0826; margin:12px 0;">
+            <h4 style="color:#fbe395; font-size:12px; margin-bottom:4px;">🛠️ Chỉnh tọa độ khung:</h4>
             <select id="adminFrameSelect" onchange="switchAdminFrame(this.value)">
                 <option value="purple_dream">🔮 Tím Mộng Mơ</option>
                 <option value="pink_ribbon">🎀 Hồng Nơ</option>
@@ -169,16 +166,16 @@
             </select>
             <button class="btn-sub-admin" onclick="document.getElementById('adminImgInput').click()">🖼️ Tải Khung PNG Mới</button>
             <input type="file" id="adminImgInput" accept="image/*" style="display:none" onchange="loadAdminBg(this)">
-            <button class="btn-sub-admin" onclick="addAdminSlot()" style="margin-top:6px;">➕ Thêm Ô Mới</button>
+            <button class="btn-sub-admin" onclick="addAdminSlot()">➕ Thêm Ô Mới</button>
             <button class="btn-sub-admin" onclick="deleteAdminSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô Đang Chọn</button>
             <button class="btn-admin" onclick="exportAdminCode()">📋 XUẤT CODE TỌA ĐỘ</button>
             <textarea id="adminOutputCode" placeholder="Code tọa độ..."></textarea>
-            <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:10px;">🔙 THOÁT VỀ TRANG CHỦ</button>
+            <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:10px; background:#333;">🔙 THOÁT VỀ TRANG CHỦ</button>
         </div>
         <div class="admin-canvas-box">
-            <p style="font-size:12px; color:#d4af37; margin-bottom:5px;" id="adminStatusText">💡 Nhập mã in bên trái hoặc chỉnh tọa độ khung tại đây</p>
+            <p style="font-size:12px; color:#d4af37; margin-bottom:8px;" id="adminStatusText">💡 Kéo thả trực tiếp trên khung để di chuyển hoặc kéo góc dưới phải để phóng to/thu nhỏ ô ảnh</p>
             <canvas id="adminCanvas" width="1240" height="1754"></canvas>
-            <button class="btn-admin" id="btnPrintDirect" style="display:none; width:auto; padding:10px 30px; margin-top:15px;" onclick="window.print()">🖨️ BẤM LỆNH IN ẢNH NÀY</button>
+            <button class="btn-admin" id="btnPrintDirect" style="display:none; width:auto; padding:10px 40px; margin-top:10px;" onclick="window.print()">🖨️ BẤM LỆNH IN ẢNH NÀY</button>
         </div>
     </div>
 
