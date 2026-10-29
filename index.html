@@ -206,8 +206,7 @@
         return new Promise((resolve) => {
             if(!db) { resolve(null); return; }
             let tx = db.transaction("frames", "readonly");
-            let req = tx.objectStore("frames", "readonly").get(key); // Tránh lỗi type
-            // Sử dụng cú pháp lấy an toàn từ IndexedDB
+            let req = tx.objectStore("frames").get(key);
             req.onsuccess = () => resolve(req.result);
             req.onerror = () => resolve(null);
         });
@@ -359,6 +358,8 @@
     function initCanvas() {
         canvas = document.getElementById('a4Canvas');
         ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         let isDragging = false, startX, startY;
 
@@ -403,6 +404,8 @@
             fImg.onload = function() {
                 canvas.width = fImg.width;
                 canvas.height = fImg.height;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 frameOverlayImg = fImg;
                 redrawCanvas();
             };
@@ -501,6 +504,7 @@
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
+        // Xuất định dạng ảnh chuẩn gốc chất lượng cao 100% không bị vỡ hạt
         let dataURL = canvas.toDataURL('image/png', 1.0);
         let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
         allOrders[code] = dataURL;
@@ -542,6 +546,8 @@
             loadedImg.onload = function() {
                 adminCanvasEl.width = loadedImg.width;
                 adminCanvasEl.height = loadedImg.height;
+                adminCtxEl.imageSmoothingEnabled = true;
+                adminCtxEl.imageSmoothingQuality = 'high';
                 adminCtxEl.clearRect(0, 0, adminCanvasEl.width, adminCanvasEl.height);
                 adminCtxEl.drawImage(loadedImg, 0, 0);
                 document.getElementById('adminStatusText').innerText = `✅ Đã tìm thấy đơn in mã: [ ${searchCode} ]`;
@@ -564,6 +570,8 @@
     function initAdminCanvas() {
         adminCanvas = document.getElementById('adminCanvas');
         adminCtx = adminCanvas.getContext('2d');
+        adminCtx.imageSmoothingEnabled = true;
+        adminCtx.imageSmoothingQuality = 'high';
         switchAdminFrame('purple_dream');
 
         adminCanvas.onmousedown = (e) => {
@@ -636,6 +644,8 @@
                 adminFrameImg = img;
                 adminCanvas.width = img.width;
                 adminCanvas.height = img.height;
+                adminCtx.imageSmoothingEnabled = true;
+                adminCtx.imageSmoothingQuality = 'high';
                 redrawAdmin();
             }
             img.onerror = function() {
@@ -663,6 +673,8 @@
                     adminFrameImg = img;
                     adminCanvas.width = img.width;
                     adminCanvas.height = img.height;
+                    adminCtx.imageSmoothingEnabled = true;
+                    adminCtx.imageSmoothingQuality = 'high';
                     redrawAdmin();
                     alert("✅ Đã tải và hiển thị khung PNG mới cho mẫu này!");
                 }
