@@ -206,7 +206,8 @@
         return new Promise((resolve) => {
             if(!db) { resolve(null); return; }
             let tx = db.transaction("frames", "readonly");
-            let req = tx.objectStore("frames").get(key);
+            let req = tx.objectStore("frames", "readonly").get(key); // Tránh lỗi type
+            // Sử dụng cú pháp lấy an toàn từ IndexedDB
             req.onsuccess = () => resolve(req.result);
             req.onerror = () => resolve(null);
         });
@@ -228,7 +229,6 @@
         { key: 'lilac_butterfly', title: '🦋 Tím Bướm', file: '' }
     ];
 
-    // Sử dụng tên file chuẩn theo đúng thư mục dự án của Dương
     const frameImageFiles = {
         'purple_dream': 'frame (4).png',
         'pink_ribbon': 'frame (2).png',
@@ -252,16 +252,16 @@
             { "x": 14, "y": 1036, "w": 481, "h": 331 }
         ],
         "blue_star": [
-            { "x": 90, "y": 100, "w": 1014, "h": 770 },
-            { "x": 80, "y": 933, "w": 1041, "h": 764 },
-            { "x": 85, "y": 1759, "w": 1036, "h": 784 },
-            { "x": 77, "y": 2593, "w": 1039, "h": 763 }
+            { "x": 175, "y": 266, "w": 514, "h": 344 },
+            { "x": 133, "y": 603, "w": 562, "h": 340 },
+            { "x": 136, "y": 945, "w": 573, "h": 346 },
+            { "x": 164, "y": 1290, "w": 539, "h": 343 }
         ],
         "retro_sun": [
-            { "x": 90, "y": 100, "w": 1014, "h": 770 },
-            { "x": 80, "y": 933, "w": 1041, "h": 764 },
-            { "x": 85, "y": 1759, "w": 1036, "h": 784 },
-            { "x": 77, "y": 2593, "w": 1039, "h": 763 }
+            { "x": 90, "y": 100, "w": 1014.3, "h": 770.7 },
+            { "x": 80, "y": 933, "w": 1041.4, "h": 764.8 },
+            { "x": 85, "y": 1759, "w": 1036.4, "h": 784.5 },
+            { "x": 77, "y": 2593, "w": 1039.3, "h": 763.8 }
         ],
         "green_check": [],
         "lilac_butterfly": [
@@ -627,7 +627,6 @@
         adminActiveSlot = 0;
         adminFrameImg = null;
         
-        // 1. Kiểm tra trong IndexedDB xem đã có ảnh custom do Dương tải lên trước đó chưa
         let dbImg = await getFrameDB(key);
         let frameSrc = dbImg || frameImageFiles[key];
 
@@ -657,7 +656,6 @@
             let reader = new FileReader();
             reader.onload = async function(e) {
                 let base64Image = e.target.result;
-                // Chỉ khi Dương chủ động bấm tải ảnh mới lên thì mới lưu đè vào IndexedDB thay thế ảnh cũ
                 saveFrameDB(adminFrameKey, base64Image);
 
                 let img = new Image();
@@ -699,13 +697,11 @@
         adminCtx.clearRect(0, 0, adminCanvas.width, adminCanvas.height);
         adminCtx.fillStyle = "#0b020a"; adminCtx.fillRect(0, 0, adminCanvas.width, adminCanvas.height);
         
-        // 1. Vẽ ảnh khung nền (nếu có sẵn hoặc đã lưu) lên trước để căn chỉnh
         if (adminFrameImg) adminCtx.drawImage(adminFrameImg, 0, 0, adminCanvas.width, adminCanvas.height);
 
         let allFrames = getStoredFrames();
         let slots = allFrames[adminFrameKey] || [];
 
-        // 2. Vẽ các ô lồng ảnh đè lên trên khung
         slots.forEach((slot, idx) => {
             let isActive = (idx === adminActiveSlot);
             adminCtx.fillStyle = isActive ? "rgba(212, 175, 55, 0.4)" : "rgba(80, 20, 80, 0.6)";
