@@ -48,6 +48,11 @@
         .modal-card p { font-size: 13px; color: #b3a5b3; margin-bottom: 20px; line-height: 1.5; }
         .print-code-box { background: #0b020a; border: 2px dashed #d4af37; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 32px; font-weight: bold; color: #fbe395; letter-spacing: 4px; }
 
+        /* MODAL HIỆN ẢNH ĐỂ NHẤN GIỮ LƯU */
+        #previewModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,2,10,0.98); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; padding: 15px; }
+        .preview-img-box { max-height: 75vh; max-width: 100%; border-radius: 10px; border: 2px solid #d4af37; overflow: hidden; margin-bottom: 12px; }
+        .preview-img-box img { width: auto; height: 100%; max-height: 73vh; display: block; object-fit: contain; }
+
         /* TRANG QUẢN TRỊ ADMIN / QUẦY IN */
         #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; height: 100vh; overflow-y: auto; }
         .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 350px; text-align: left; height: fit-content; }
@@ -136,6 +141,15 @@
             <div class="print-code-box" id="displayPrintCode">XDG</div>
             <button class="btn-action btn-print" onclick="location.reload()" style="width:100%;">TẠO PHIÊN MỚI</button>
         </div>
+    </div>
+
+    <!-- MODAL HIỆN ẢNH CHUẨN GỐC ĐỂ KHÁCH NHẤN GIỮ LƯU -->
+    <div id="previewModal" onclick="closePreviewModal()">
+        <p style="color: #fbe395; font-size: 13px; margin-bottom: 8px; font-weight: bold; text-align: center;">👆 NHẤN GIỮ VÀO ẢNH & CHỌN "LƯU VÀO ẢNH"</p>
+        <div class="preview-img-box" onclick="event.stopPropagation()">
+            <img id="previewImageElement" src="" alt="Bloom Shoot Final">
+        </div>
+        <button class="btn-action btn-download" onclick="closePreviewModal()" style="max-width: 150px; background:#1a0518; color:#fbe395; border:1px solid #d4af37; margin-top:5px;">ĐÓNG</button>
     </div>
 
     <!-- 4. TRANG QUẢN TRỊ & MÁY TẠI QUẦY IN -->
@@ -381,14 +395,15 @@
         if(frameOverlayImg) ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
     }
 
-    // TẢI TRỰC TIẾP KHÔNG LẰNG NHẰNG
+    // HIỆN POPUP ẢNH GỐC ĐỂ KHÁCH NHẤN GIỮ LƯU VỀ MÁY NÉT CĂNG
     function downloadImage() {
-        let link = document.createElement('a');
-        link.download = `BLOOM_SHOOT_${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        let dataUrl = canvas.toDataURL('image/png', 1.0);
+        document.getElementById('previewImageElement').src = dataUrl;
+        document.getElementById('previewModal').style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+        document.getElementById('previewModal').style.display = 'none';
     }
 
     function showConfirmModal() {
@@ -408,7 +423,7 @@
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        let dataURL = canvas.toDataURL('image/png');
+        let dataURL = canvas.toDataURL('image/png', 1.0);
         let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
         allOrders[code] = dataURL;
         localStorage.setItem('BLOOM_PRINT_ORDERS', JSON.stringify(allOrders));
@@ -538,7 +553,7 @@
                 adminFrameImg = null;
                 redrawAdmin();
             };
-            img.src = frameSrc;
+            adminFrameImg.src = frameSrc;
         } else {
             adminCanvas.width = 1240; adminCanvas.height = 1754;
             adminFrameImg = null;
