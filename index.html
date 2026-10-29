@@ -626,6 +626,7 @@
         adminActiveSlot = 0;
         adminFrameImg = null;
         
+        // Ưu tiên load ảnh custom đã lưu trong IndexedDB, nếu chưa có thì load ảnh mặc định theo đúng key khung
         let dbImg = await getFrameDB(key);
         let frameSrc = dbImg || frameImageFiles[key];
 
@@ -663,7 +664,7 @@
                     adminCanvas.width = img.width;
                     adminCanvas.height = img.height;
                     redrawAdmin();
-                    alert("✅ Đã tải và hiển thị khung PNG mới cực kỳ mượt mà!");
+                    alert("✅ Đã tải và hiển thị khung PNG mới cho mẫu này!");
                 }
                 img.src = base64Image;
             }
@@ -696,9 +697,13 @@
         adminCtx.clearRect(0, 0, adminCanvas.width, adminCanvas.height);
         adminCtx.fillStyle = "#0b020a"; adminCtx.fillRect(0, 0, adminCanvas.width, adminCanvas.height);
         
+        // 1. Vẽ ảnh khung trước để làm nền tham chiếu cho Dương căn chỉnh
+        if (adminFrameImg) adminCtx.drawImage(adminFrameImg, 0, 0, adminCanvas.width, adminCanvas.height);
+
         let allFrames = getStoredFrames();
         let slots = allFrames[adminFrameKey] || [];
 
+        // 2. Vẽ đè các ô lồng ảnh lên trên
         slots.forEach((slot, idx) => {
             let isActive = (idx === adminActiveSlot);
             adminCtx.fillStyle = isActive ? "rgba(212, 175, 55, 0.4)" : "rgba(80, 20, 80, 0.6)";
@@ -716,8 +721,6 @@
                 adminCtx.fillRect(slot.x + slot.w - ADMIN_HANDLE/2, slot.y + slot.h - ADMIN_HANDLE/2, ADMIN_HANDLE, ADMIN_HANDLE);
             }
         });
-
-        if (adminFrameImg) adminCtx.drawImage(adminFrameImg, 0, 0, adminCanvas.width, adminCanvas.height);
     }
 
     function exportAdminCode() {
