@@ -228,6 +228,7 @@
         { key: 'lilac_butterfly', title: '🦋 Tím Bướm', file: '' }
     ];
 
+    // Sử dụng tên file chuẩn theo đúng thư mục dự án của Dương
     const frameImageFiles = {
         'purple_dream': 'frame (4).png',
         'pink_ribbon': 'frame (2).png',
@@ -626,7 +627,7 @@
         adminActiveSlot = 0;
         adminFrameImg = null;
         
-        // Ưu tiên load ảnh custom đã lưu trong IndexedDB, nếu chưa có thì load ảnh mặc định theo đúng key khung
+        // 1. Kiểm tra trong IndexedDB xem đã có ảnh custom do Dương tải lên trước đó chưa
         let dbImg = await getFrameDB(key);
         let frameSrc = dbImg || frameImageFiles[key];
 
@@ -643,7 +644,7 @@
                 adminFrameImg = null;
                 redrawAdmin();
             };
-            adminFrameImg.src = frameSrc;
+            img.src = frameSrc;
         } else {
             adminCanvas.width = 1240; adminCanvas.height = 1754;
             adminFrameImg = null;
@@ -656,6 +657,7 @@
             let reader = new FileReader();
             reader.onload = async function(e) {
                 let base64Image = e.target.result;
+                // Chỉ khi Dương chủ động bấm tải ảnh mới lên thì mới lưu đè vào IndexedDB thay thế ảnh cũ
                 saveFrameDB(adminFrameKey, base64Image);
 
                 let img = new Image();
@@ -697,13 +699,13 @@
         adminCtx.clearRect(0, 0, adminCanvas.width, adminCanvas.height);
         adminCtx.fillStyle = "#0b020a"; adminCtx.fillRect(0, 0, adminCanvas.width, adminCanvas.height);
         
-        // 1. Vẽ ảnh khung trước để làm nền tham chiếu cho Dương căn chỉnh
+        // 1. Vẽ ảnh khung nền (nếu có sẵn hoặc đã lưu) lên trước để căn chỉnh
         if (adminFrameImg) adminCtx.drawImage(adminFrameImg, 0, 0, adminCanvas.width, adminCanvas.height);
 
         let allFrames = getStoredFrames();
         let slots = allFrames[adminFrameKey] || [];
 
-        // 2. Vẽ đè các ô lồng ảnh lên trên
+        // 2. Vẽ các ô lồng ảnh đè lên trên khung
         slots.forEach((slot, idx) => {
             let isActive = (idx === adminActiveSlot);
             adminCtx.fillStyle = isActive ? "rgba(212, 175, 55, 0.4)" : "rgba(80, 20, 80, 0.6)";
