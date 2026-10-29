@@ -146,7 +146,7 @@
         </div>
     </div>
 
-    <!-- 4. TRANG QUẢN TRỊ ADMIN / QUẦY IN (CHUYÊN TRÊN MÁY TÍNH DÙNG CHUỘT) -->
+    <!-- 4. TRANG QUẢN TRỊ ADMIN / QUẦY IN (CHO MÁY TÍNH DÙNG CHUỘT) -->
     <div id="adminPanel">
         <div class="admin-sidebar">
             <h3 style="color:#fbe395; font-size:15px; margin-bottom:6px;">🖨️ QUẦY IN & EDIT KHUNG</h3>
@@ -465,8 +465,56 @@
         if(frameOverlayImg) ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
     }
 
-    function downloadImage() {
-        canvas.toBlob((blob) => {
+    // HÀM TẠO ẢNH CHẤT LƯỢNG GỐC 100% ĐỂ GIỮ NGUYÊN ĐỘ NÉT CĂNG
+    function generateHighResCanvas() {
+        return new Promise(async (resolve) => {
+            let offCanvas = document.createElement('canvas');
+            offCanvas.width = canvas.width;
+            offCanvas.height = canvas.height;
+            let oCtx = offCanvas.getContext('2d');
+            oCtx.imageSmoothingEnabled = true;
+            oCtx.imageSmoothingQuality = 'high';
+
+            oCtx.fillStyle = "#0b020a";
+            oCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+            let currentSlots = getCurrentSlots();
+
+            currentSlots.forEach((slot, idx) => {
+                oCtx.save();
+                oCtx.beginPath();
+                oCtx.rect(slot.x, slot.y, slot.w, slot.h);
+                oCtx.clip();
+                oCtx.fillStyle = "#1a0518";
+                oCtx.fillRect(slot.x, slot.y, slot.w, slot.h);
+
+                if(slotAssignments[idx]) {
+                    let data = slotAssignments[idx], img = data.img;
+                    oCtx.save();
+                    oCtx.translate(slot.x + slot.w/2 + data.offsetX, slot.y + slot.h/2 + data.offsetY);
+                    oCtx.rotate((data.rotation * Math.PI) / 180);
+
+                    let imgRatio = img.width / img.height, slotRatio = slot.w / slot.h, dW, dH;
+                    if(imgRatio > slotRatio) { dH = slot.h * data.scale; dW = dH * imgRatio; }
+                    else { dW = slot.w * data.scale; dH = dW / imgRatio; }
+
+                    oCtx.drawImage(img, -dW/2, -dH/2, dW, dH);
+                    oCtx.restore();
+                }
+                oCtx.restore();
+            });
+
+            if(frameOverlayImg) {
+                oCtx.drawImage(frameOverlayImg, 0, 0, offCanvas.width, offCanvas.height);
+            }
+
+            resolve(offCanvas);
+        });
+    }
+
+    async function downloadImage() {
+        let hiResCanvas = await generateHighResCanvas();
+        hiResCanvas.toBlob((blob) => {
             if (!blob) return;
             let file = new File([blob], `BLOOM_SHOOT_${Date.now()}.png`, { type: 'image/png' });
 
@@ -497,15 +545,16 @@
         document.getElementById('confirmModal').style.display = 'none';
     }
 
-    function generateAndSavePrintCode() {
+    async function generateAndSavePrintCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let code = '';
         for (let i = 0; i < 3; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        // Xuất định dạng ảnh chuẩn gốc chất lượng cao 100% không bị vỡ hạt
-        let dataURL = canvas.toDataURL('image/png', 1.0);
+        let hiResCanvas = await generateHighResCanvas();
+        let dataURL = hiResCanvas.toDataURL('image/png', 1.0);
+        
         let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
         allOrders[code] = dataURL;
         localStorage.setItem('BLOOM_PRINT_ORDERS', JSON.stringify(allOrders));
