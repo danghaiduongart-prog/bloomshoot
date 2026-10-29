@@ -14,14 +14,25 @@
         .login-card { background: #1a0518; padding: 30px; border-radius: 20px; border: 1px solid #2a0826; text-align: center; width: 100%; max-width: 350px; }
         .login-card input { width: 100%; padding: 15px; font-size: 24px; text-align: center; background: #0b020a; border: 2px solid #2a0826; color: #fbe395; border-radius: 10px; margin: 15px 0; }
         
-        /* MÀN HÌNH CHỌN KHUNG */
-        #frameSelectScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; z-index: 90; display: none; flex-direction: column; padding: 20px; justify-content: center; align-items: center; }
-        .frame-select-card { background: #1a0518; border: 2px solid #d4af37; border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; text-align: center; }
-        .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
-        .select-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 15px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
-        .select-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
+        /* MÀN HÌNH CHỌN KHUNG DẠNG CARDS PREVIEW NHƯ RED BUTTON */
+        #frameSelectScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b020a; z-index: 90; display: none; flex-direction: column; padding: 15px; align-items: center; }
+        .frame-select-container { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; }
+        .frame-header { text-align: center; margin-bottom: 12px; flex-shrink: 0; }
+        .frame-header h2 { color: #fbe395; font-size: 20px; letter-spacing: 1px; }
+        .frame-header p { font-size: 12px; color: #b3a5b3; margin-top: 4px; }
+        
+        .frame-grid-scroll { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; margin-bottom: 15px; }
+        
+        .frame-card { background: #1a0518; border: 2px solid #2a0826; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 10px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+        .frame-card.active { border-color: #d4af37; background: #2a0826; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); transform: scale(1.02); }
+        .frame-preview-img-box { width: 100%; height: 160px; border-radius: 10px; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 8px; border: 1px solid rgba(212,175,55,0.2); }
+        .frame-preview-img-box img { width: 100%; height: 100%; object-fit: contain; }
+        .frame-card-title { font-size: 13px; font-weight: bold; color: #ffffff; text-align: center; }
+        .frame-card.active .frame-card-title { color: #fbe395; }
 
-        /* MÀN HÌNH CHÍNH */
+        .btn-confirm-frame { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 30px; border: none; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); flex-shrink: 0; }
+
+        /* MÀN HÌNH CHÍNH NHƯ CŨ */
         .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
         .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; width: 100%; }
         
@@ -72,20 +83,19 @@
         </div>
     </div>
 
-    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG -->
+    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG DẠNG THẺ PREVIEW (RED BUTTON STYLE) -->
     <div id="frameSelectScreen">
-        <div class="frame-select-card">
-            <h3 style="color:#fbe395; margin-bottom:5px;">CHỌN MẪU KHUNG</h3>
-            <p style="font-size:12px; color:#b3a5b3;">Chọn một mẫu khung yêu thích của bạn:</p>
-            <div class="select-grid">
-                <button class="select-btn active" onclick="selectFrameType('purple_dream', this)">🔮 Tím Mộng Mơ</button>
-                <button class="select-btn" onclick="selectFrameType('pink_ribbon', this)">🎀 Hồng Nơ</button>
-                <button class="select-btn" onclick="selectFrameType('blue_star', this)">⭐ Xanh Sao</button>
-                <button class="select-btn" onclick="selectFrameType('retro_sun', this)">🌻 Retro Sọc</button>
-                <button class="select-btn" onclick="selectFrameType('green_check', this)">🏁 Xanh Caro</button>
-                <button class="select-btn" onclick="selectFrameType('lilac_butterfly', this)">🦋 Tím Bướm</button>
+        <div class="frame-select-container">
+            <div class="frame-header">
+                <h2>CHỌN MẪU KHUNG</h2>
+                <p>Chạm vào mẫu khung bạn muốn chọn để bắt đầu ghép ảnh</p>
             </div>
-            <button class="btn-action btn-print" onclick="startMainApp()" style="width:100%; margin-top:10px;">ĐỒNG Ý & TIẾP TỤC</button>
+            
+            <div class="frame-grid-scroll" id="frameGridScroll">
+                <!-- Danh sách khung sẽ được tạo tự động bằng JS -->
+            </div>
+
+            <button class="btn-confirm-frame" onclick="startMainApp()">BẮT ĐẦU GHÉP ÁNH ✨</button>
         </div>
     </div>
 
@@ -138,7 +148,7 @@
         </div>
     </div>
 
-    <!-- 4. TRANG QUẢN TRỊ & MÁY TẠI QUẦY IN -->
+    <!-- 4. TRANG QUẢN TRỊ ADMIN / QUẦY IN -->
     <div id="adminPanel">
         <div class="admin-sidebar">
             <h3 style="color:#fbe395; margin-bottom:10px;">🖨️ TAB QUẦY THU NGÂN / IN ẢNH</h3>
@@ -176,6 +186,15 @@
     let uploadedImages = [], slotAssignments = {}, activeSlot = 0, currentFrameType = 'purple_dream';
     let canvas, ctx;
     let frameOverlayImg = null;
+
+    const frameListInfo = [
+        { key: 'purple_dream', title: '🔮 Tím Mộng Mơ', file: 'frame (4).png' },
+        { key: 'pink_ribbon', title: '🎀 Hồng Nơ', file: 'frame (2).png' },
+        { key: 'blue_star', title: '⭐ Xanh Sao', file: 'frame.png' },
+        { key: 'retro_sun', title: '🌻 Retro Sọc', file: 'frame (3).png' },
+        { key: 'green_check', title: '🏁 Xanh Caro', file: '' },
+        { key: 'lilac_butterfly', title: '🦋 Tím Bướm', file: '' }
+    ];
 
     const frameImageFiles = {
         'purple_dream': 'frame (4).png',
@@ -224,12 +243,34 @@
     function goToFrameSelect() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('frameSelectScreen').style.display = 'flex';
+        renderFrameCards();
     }
 
-    function selectFrameType(type, btn) {
-        currentFrameType = type;
-        document.querySelectorAll('.select-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function renderFrameCards() {
+        let grid = document.getElementById('frameGridScroll');
+        grid.innerHTML = '';
+        let allImages = getStoredImages();
+
+        frameListInfo.forEach(item => {
+            let card = document.createElement('div');
+            card.className = `frame-card ${item.key === currentFrameType ? 'active' : ''}`;
+            
+            let imgSrc = allImages[item.key] || item.file;
+            let imgHTML = imgSrc ? `<img src="${imgSrc}" alt="${item.title}">` : `<span style="font-size:12px; color:#b3a5b3;">Chưa có ảnh</span>`;
+
+            card.innerHTML = `
+                <div class="frame-preview-img-box">${imgHTML}</div>
+                <div class="frame-card-title">${item.title}</div>
+            `;
+
+            card.onclick = () => {
+                currentFrameType = item.key;
+                document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+            };
+
+            grid.appendChild(card);
+        });
     }
 
     function startMainApp() {
@@ -381,7 +422,6 @@
         if(frameOverlayImg) ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
     }
 
-    // KÍCH HOẠT BẢNG SHARE HỆ THỐNG GỐC, NÉT CĂNG 100%
     function downloadImage() {
         canvas.toBlob((blob) => {
             if (!blob) return;
