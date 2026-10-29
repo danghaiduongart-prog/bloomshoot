@@ -21,18 +21,11 @@
         .select-btn { background: #0b020a; border: 2px solid #2a0826; color: #b3a5b3; padding: 15px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
         .select-btn.active { border-color: #d4af37; color: #fbe395; background: #2a0826; }
 
-        /* MÀN HÌNH CHÍNH - HIỂN THỊ FULL TRỌN VẸN KHUNG FAME */
+        /* MÀN HÌNH CHÍNH */
         .main-app { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; padding: 8px; padding-bottom: 70px; }
-        
         .canvas-container { flex: 1; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2a0826; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 6px; min-height: 0; width: 100%; }
         
-        canvas { 
-            width: 100%; 
-            height: 100%; 
-            display: block; 
-            touch-action: none; 
-            object-fit: contain; 
-        }
+        canvas { width: 100%; height: 100%; display: block; touch-action: none; object-fit: contain; }
         
         .edit-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; flex-shrink: 0; }
         .btn-tool { background: #0b020a; border: 1px solid #d4af37; color: #fbe395; padding: 6px 2px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
@@ -55,19 +48,20 @@
         .modal-card p { font-size: 13px; color: #b3a5b3; margin-bottom: 20px; line-height: 1.5; }
         .print-code-box { background: #0b020a; border: 2px dashed #d4af37; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 32px; font-weight: bold; color: #fbe395; letter-spacing: 4px; }
 
+        /* TRANG QUẢN TRỊ ADMIN / QUẦY IN */
         #adminPanel { display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 20px; height: 100vh; overflow-y: auto; }
-        .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 320px; text-align: left; height: fit-content; }
+        .admin-sidebar { background: #1a0518; border: 1px solid #2a0826; border-radius: 12px; padding: 15px; width: 350px; text-align: left; height: fit-content; }
         .admin-canvas-box { flex: 1; background: #000; border: 2px solid #d4af37; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .admin-canvas-box canvas { width: 100%; max-width: 700px; height: auto; cursor: crosshair; object-fit: contain; border: 1px solid #2a0826; }
+        .admin-canvas-box canvas { width: 100%; max-width: 600px; height: auto; object-fit: contain; border: 1px solid #2a0826; }
         .btn-admin { background: linear-gradient(135deg, #d4af37, #f3d77b); color: #0b020a; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; text-align: center; display: block; }
-        select { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
+        select, input[type="text"] { width: 100%; padding: 10px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 10px 0; font-weight: bold; }
         textarea { width: 100%; height: 90px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 8px; padding: 8px; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <button id="settingsBtn" onclick="openAdmin()">⚙️</button>
+    <button id="settingsBtn" onclick="openAdminMenu()">⚙️</button>
 
     <!-- 1. MÀN HÌNH NHẬP MÃ IN -->
     <div id="loginScreen">
@@ -95,7 +89,7 @@
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN CHÍNH -->
+    <!-- 3. GIAO DIỆN CHÍNH (KHÁCH GHÉP ẢNH) -->
     <div class="main-app" id="mainApp">
         <div class="canvas-container" id="canvasContainer">
             <canvas id="a4Canvas"></canvas>
@@ -133,7 +127,7 @@
             <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy.</p>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
-                <button class="btn-action btn-print" onclick="generatePrintCode()">XÁC NHẬN</button>
+                <button class="btn-action btn-print" onclick="generateAndSavePrintCode()">XÁC NHẬN</button>
             </div>
         </div>
         <div class="modal-card" id="modalStep2" style="display:none;">
@@ -144,11 +138,17 @@
         </div>
     </div>
 
-    <!-- TRANG QUẢN TRỊ ADMIN -->
+    <!-- 4. TRANG QUẢN TRỊ & MÁY TẠI QUẦY IN -->
     <div id="adminPanel">
         <div class="admin-sidebar">
-            <h3 style="color:#fbe395; margin-bottom:10px;">🛠️ TRANG QUẢN TRỊ KHUNG</h3>
-            <label style="font-size:12px; color:#b3a5b3;">Chọn mẫu khung chỉnh sửa:</label>
+            <h3 style="color:#fbe395; margin-bottom:10px;">🖨️ TAB QUẦY THU NGÂN / IN ẢNH</h3>
+            <p style="font-size:12px; color:#b3a5b3; margin-bottom:10px;">Nhập mã in của khách đọc để tải ảnh:</p>
+            
+            <input type="text" id="inputSearchCode" placeholder="Nhập mã in (Ví dụ: XDG)" style="text-transform:uppercase;" maxlength="3">
+            <button class="btn-admin" onclick="searchPrintOrder()">🔍 TÌM ẢNH KHÁCH</button>
+            
+            <hr style="border-color:#2a0826; margin:15px 0;">
+            <h4 style="color:#fbe395; font-size:13px; margin-bottom:8px;">🛠️ Quản Trị Tọa Độ Khung:</h4>
             <select id="adminFrameSelect" onchange="switchAdminFrame(this.value)">
                 <option value="purple_dream">🔮 Tím Mộng Mơ</option>
                 <option value="pink_ribbon">🎀 Hồng Nơ</option>
@@ -157,21 +157,18 @@
                 <option value="green_check">🏁 Xanh Caro</option>
                 <option value="lilac_butterfly">🦋 Tím Bướm</option>
             </select>
-
-            <button class="btn-sub-admin" onclick="document.getElementById('adminImgInput').click()">🖼️ Tải Ảnh Khung PNG</button>
+            <button class="btn-sub-admin" onclick="document.getElementById('adminImgInput').click()">🖼️ Tải Khung PNG Mới</button>
             <input type="file" id="adminImgInput" accept="image/*" style="display:none" onchange="loadAdminBg(this)">
-
-            <button class="btn-sub-admin" onclick="addAdminSlot()" style="margin-top:10px;">➕ Thêm Ô Mới</button>
+            <button class="btn-sub-admin" onclick="addAdminSlot()" style="margin-top:6px;">➕ Thêm Ô Mới</button>
             <button class="btn-sub-admin" onclick="deleteAdminSlot()" style="color:#ff6b81; border-color:#ff6b81;">❌ Xóa Ô Đang Chọn</button>
-
-            <hr style="border-color:#2a0826; margin:12px 0;">
-            <button class="btn-admin" onclick="exportAdminCode()">📋 XUẤT CODE TỌA ĐỘ BẬC CAO</button>
-            <textarea id="adminOutputCode" placeholder="Bấm nút trên để copy tọa độ..."></textarea>
-            <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:8px;">🔙 THOÁT</button>
+            <button class="btn-admin" onclick="exportAdminCode()">📋 XUẤT CODE TỌA ĐỘ</button>
+            <textarea id="adminOutputCode" placeholder="Code tọa độ..."></textarea>
+            <button class="btn-sub-admin" onclick="location.reload()" style="margin-top:10px;">🔙 THOÁT VỀ TRANG CHỦ</button>
         </div>
         <div class="admin-canvas-box">
-            <p style="font-size:12px; color:#d4af37; margin-bottom:5px;">🖱️ Nắm giữa ô để kéo đi | Kéo góc phải dưới để chỉnh kích thước</p>
+            <p style="font-size:12px; color:#d4af37; margin-bottom:5px;" id="adminStatusText">💡 Nhập mã in bên trái hoặc chỉnh tọa độ khung tại đây</p>
             <canvas id="adminCanvas" width="1240" height="1754"></canvas>
+            <button class="btn-admin" id="btnPrintDirect" style="display:none; width:auto; padding:10px 30px; margin-top:15px;" onclick="window.print()">🖨️ BẤM LỆNH IN ẢNH NÀY</button>
         </div>
     </div>
 
@@ -214,17 +211,13 @@
 
     function getStoredFrames() {
         let saved = localStorage.getItem('BLOOM_ALL_FRAMES_V8');
-        if(saved) {
-            try { return JSON.parse(saved); } catch(e) {}
-        }
+        if(saved) { try { return JSON.parse(saved); } catch(e) {} }
         return masterFrames;
     }
 
     function getStoredImages() {
         let saved = localStorage.getItem('BLOOM_ALL_IMAGES_V8');
-        if(saved) {
-            try { return JSON.parse(saved); } catch(e) {}
-        }
+        if(saved) { try { return JSON.parse(saved); } catch(e) {} }
         return {};
     }
 
@@ -388,11 +381,19 @@
         if(frameOverlayImg) ctx.drawImage(frameOverlayImg, 0, 0, canvas.width, canvas.height);
     }
 
+    // FIX TẢI ẢNH VỀ ĐIỆN THOẠI MƯỢT MÀ
     function downloadImage() {
-        let link = document.createElement('a');
-        link.download = `BLOOM_SHOOT_FRAME.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = `BLOOM_SHOOT_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }, 'image/png');
     }
 
     function showConfirmModal() {
@@ -405,28 +406,26 @@
         document.getElementById('confirmModal').style.display = 'none';
     }
 
-    function generatePrintCode() {
+    function generateAndSavePrintCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let code = '';
         for (let i = 0; i < 3; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+
+        let dataURL = canvas.toDataURL('image/png');
+        let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
+        allOrders[code] = dataURL;
+        localStorage.setItem('BLOOM_PRINT_ORDERS', JSON.stringify(allOrders));
+
         document.getElementById('displayPrintCode').innerText = code;
         document.getElementById('modalStep1').style.display = 'none';
         document.getElementById('modalStep2').style.display = 'block';
     }
 
-    /* QUẢN TRỊ ADMIN */
-    let adminCanvas, adminCtx;
-    let adminFrameKey = 'purple_dream';
-    let adminFrameImg = null;
-    let adminActiveSlot = 0;
-    let isAdminDragging = false, isAdminResizing = false;
-    let adminStartX, adminStartY;
-    const ADMIN_HANDLE = 40;
-
-    function openAdmin() {
-        let pwd = prompt("Nhập mật khẩu quản trị:");
+    /* CHỨC NĂNG DÀNH CHO NHÂN VIÊN TẠI QUẦY IN */
+    function openAdminMenu() {
+        let pwd = prompt("Nhập mật khẩu quản trị/quầy in:");
         if (pwd === "1111") {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('frameSelectScreen').style.display = 'none';
@@ -439,6 +438,39 @@
             alert("Sai mật khẩu!");
         }
     }
+
+    function searchPrintOrder() {
+        let searchCode = document.getElementById('inputSearchCode').value.trim().toUpperCase();
+        let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
+
+        if(allOrders[searchCode]) {
+            let imgData = allOrders[searchCode];
+            let adminCanvasEl = document.getElementById('adminCanvas');
+            let adminCtxEl = adminCanvasEl.getContext('2d');
+            
+            let loadedImg = new Image();
+            loadedImg.onload = function() {
+                adminCanvasEl.width = loadedImg.width;
+                adminCanvasEl.height = loadedImg.height;
+                adminCtxEl.clearRect(0, 0, adminCanvasEl.width, adminCanvasEl.height);
+                adminCtxEl.drawImage(loadedImg, 0, 0);
+                document.getElementById('adminStatusText').innerText = `✅ Đã tìm thấy đơn in mã: [ ${searchCode} ]`;
+                document.getElementById('btnPrintDirect').style.display = 'block';
+            }
+            loadedImg.src = imgData;
+        } else {
+            alert("❌ Không tìm thấy mã in này! Vui lòng kiểm tra lại mã khách đọc.");
+        }
+    }
+
+    /* QUẢN TRỊ ADMIN KHUNG */
+    let adminCanvas, adminCtx;
+    let adminFrameKey = 'purple_dream';
+    let adminFrameImg = null;
+    let adminActiveSlot = 0;
+    let isAdminDragging = false, isAdminResizing = false;
+    let adminStartX, adminStartY;
+    const ADMIN_HANDLE = 40;
 
     function initAdminCanvas() {
         adminCanvas = document.getElementById('adminCanvas');
@@ -526,7 +558,7 @@
                 let base64Image = e.target.result;
                 let allImages = getStoredImages();
                 allImages[adminFrameKey] = base64Image;
-                localStorage.setItem('BLOOM_ALL_IMAGES_V8', JSON.stringify(allImages));
+                localStorage.setItem('BLOOM_ALL_IMAGES_V8', JSON.stringify(base64Image));
                 
                 let img = new Image();
                 img.onload = function() {
@@ -593,7 +625,7 @@
         let codeStr = JSON.stringify(allFrames, null, 4);
         document.getElementById('adminOutputCode').value = codeStr;
         navigator.clipboard.writeText(codeStr);
-        alert("⚡ ĐÃ COPY TỌA ĐỘ VÀO BỘ NHỚ! Anh dán vào biến masterFrames trong code index.html là xong 100%!");
+        alert("⚡ ĐÃ COPY TỌA ĐỘ VÀO BỘ NHỚ!");
     }
 </script>
 </body>
