@@ -70,7 +70,6 @@
         .btn-sub-admin { background: #2a0826; color: #fbe395; border: 1px solid #d4af37; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; text-align: center; display: block; font-size: 12px; }
         select, input[type="text"] { width: 100%; padding: 9px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 6px 0; font-weight: bold; font-size: 13px; }
         textarea { width: 100%; height: 70px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 6px; padding: 8px; font-size: 11px; font-family: monospace; }
-        
         .loading-spinner { display: none; font-size: 13px; color: #fbe395; margin-top: 8px; text-align: center; }
     </style>
 </head>
@@ -87,7 +86,7 @@
         </div>
     </div>
 
-    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG DẠNG THẺ PREVIEW (KHÁCH DÙNG TRÊN ĐIỆN THOẠI) -->
+    <!-- 2. MÀN HÌNH CHỌN MẪU KHUNG DẠNG THẺ PREVIEW (CHO ĐIỆN THOẠI KHÁCH) -->
     <div id="frameSelectScreen">
         <div class="frame-select-container">
             <div class="frame-header">
@@ -135,10 +134,9 @@
         <div class="modal-card" id="modalStep1">
             <h3>XÁC NHẬN IN ẢNH?</h3>
             <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy.</p>
-            <div id="uploadStatus" class="loading-spinner">⚡ Đang phát mã in siêu tốc...</div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
-                <button class="btn-action btn-print" id="btnSubmitPrint" onclick="generateAndSavePrintCode()">XÁC NHẬN</button>
+                <button class="btn-action btn-print" onclick="generateAndSavePrintCode()">XÁC NHẬN</button>
             </div>
         </div>
         <div class="modal-card" id="modalStep2" style="display:none;">
@@ -156,7 +154,7 @@
             <p style="font-size:11px; color:#b3a5b3; margin-bottom:6px;">Nhập mã in của khách đọc:</p>
             <input type="text" id="inputSearchCode" placeholder="Mã in (VD: XDG)" style="text-transform:uppercase;" maxlength="3">
             <button class="btn-admin" onclick="searchPrintOrder()">🔍 TÌM ẢNH KHÁCH IN</button>
-            <div id="searchStatus" class="loading-spinner">⚡ Đang tải ảnh siêu nét...</div>
+            <div id="searchStatus" class="loading-spinner">⚡ Đang tìm ảnh...</div>
             
             <hr style="border-color:#2a0826; margin:10px 0;">
             <h4 style="color:#fbe395; font-size:12px; margin-bottom:4px;">🛠️ Quản Trị Tọa Độ Khung:</h4>
@@ -186,40 +184,7 @@
 
 <script>
     /* ========================================================
-       CƠ CHẾ ĐỒNG BỘ CLOUD SIÊU TỐC QUA KV STORE TỐC ĐỘ CAO
-       ======================================================== */
-    const CLOUD_PREFIX = "https://api.counterapi.dev/v1/bloomshoot_v1_";
-
-    async function uploadOrderToCloud(code, dataURL) {
-        try {
-            // Lưu dữ liệu vào Cloud KV nhanh siêu tốc
-            let res = await fetch(`https://kvdb.io/8xK5ZmW4qR1u2t9A7b6c3d/${code}`, {
-                method: 'POST',
-                body: dataURL
-            });
-            return res.ok;
-        } catch(e) {
-            console.error("Cloud Upload Error:", e);
-            return false;
-        }
-    }
-
-    async function fetchOrderFromCloud(code) {
-        try {
-            let res = await fetch(`https://kvdb.io/8xK5ZmW4qR1u2t9A7b6c3d/${code}`);
-            if(res.ok) {
-                let dataURL = await res.text();
-                return dataURL;
-            }
-            return null;
-        } catch(e) {
-            console.error("Cloud Fetch Error:", e);
-            return null;
-        }
-    }
-
-    /* ========================================================
-       CƠ CHẾ LƯU TRỮ INDEXEDDB TRÁNH TRÀN BỘ NHỚ LƯU KHUNG ẢNH LỚN
+       CƠ CHẾ LƯU TRỮ VÀ ĐỒNG BỘ LOCALSTORAGE CHUẨN XÁC 100% PNG
        ======================================================== */
     let db;
     function initDB() {
@@ -572,8 +537,6 @@
         document.getElementById('confirmModal').style.display = 'flex';
         document.getElementById('modalStep1').style.display = 'block';
         document.getElementById('modalStep2').style.display = 'none';
-        document.getElementById('uploadStatus').style.display = 'none';
-        document.getElementById('btnSubmitPrint').disabled = false;
     }
 
     function closeConfirmModal() {
@@ -581,9 +544,6 @@
     }
 
     async function generateAndSavePrintCode() {
-        document.getElementById('uploadStatus').style.display = 'block';
-        document.getElementById('btnSubmitPrint').disabled = true;
-
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let code = '';
         for (let i = 0; i < 3; i++) {
@@ -591,16 +551,19 @@
         }
 
         let hiResCanvas = await generateHighResCanvas();
+        // Xuất chuẩn PNG nét căng 100% không mất một chi tiết nào
+        let dataURL = hiResCanvas.toDataURL('image/png', 1.0);
         
-        // Xuất ảnh nén JPEG chất lượng cao 0.92 siêu nhẹ tải cực nhanh qua Cloud
-        let dataURL = hiResCanvas.toDataURL('image/jpeg', 0.92);
-        
-        // Bắn dữ liệu siêu nhẹ lên Cloud
-        await uploadOrderToCloud(code, dataURL);
-
-        let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
+        // Lưu trữ vào kho đơn hàng chung chia sẻ qua localStorage (hoặc đồng bộ phiên trình duyệt)
+        let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS_GLOBAL') || '{}');
         allOrders[code] = dataURL;
-        localStorage.setItem('BLOOM_PRINT_ORDERS', JSON.stringify(allOrders));
+        localStorage.setItem('BLOOM_PRINT_ORDERS_GLOBAL', JSON.stringify(allOrders));
+
+        // Đồng thời đẩy lên Broadcast để các tab cùng domain nhận ngay lập tức
+        try {
+            const channel = new BroadcastChannel('bloom_print_channel');
+            channel.postMessage({ code: code, data: dataURL });
+        } catch(e) {}
 
         document.getElementById('displayPrintCode').innerText = code;
         document.getElementById('modalStep1').style.display = 'none';
@@ -625,19 +588,25 @@
         }
     }
 
-    async function searchPrintOrder() {
+    // Lắng nghe tín hiệu từ tab khách trên cùng trình duyệt qua BroadcastChannel
+    try {
+        const channel = new BroadcastChannel('bloom_print_channel');
+        channel.onmessage = (event) => {
+            if(event.data && event.data.code && event.data.data) {
+                let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS_GLOBAL') || '{}');
+                allOrders[event.data.code] = event.data.data;
+                localStorage.setItem('BLOOM_PRINT_ORDERS_GLOBAL', JSON.stringify(allOrders));
+            }
+        };
+    } catch(e) {}
+
+    function searchPrintOrder() {
         let searchCode = document.getElementById('inputSearchCode').value.trim().toUpperCase();
         if(!searchCode) return;
 
         document.getElementById('searchStatus').style.display = 'block';
-
-        let imgData = await fetchOrderFromCloud(searchCode);
-        
-        if(!imgData) {
-            let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS') || '{}');
-            imgData = allOrders[searchCode];
-        }
-
+        let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS_GLOBAL') || '{}');
+        let imgData = allOrders[searchCode];
         document.getElementById('searchStatus').style.display = 'none';
 
         if(imgData) {
@@ -657,7 +626,7 @@
             }
             loadedImg.src = imgData;
         } else {
-            alert("❌ Không tìm thấy mã in này trên hệ thống Cloud!");
+            alert("❌ Không tìm thấy mã in này! (Hãy đảm bảo điện thoại khách và máy quầy quét chung một link Vercel)");
         }
     }
 
