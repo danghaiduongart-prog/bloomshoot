@@ -188,7 +188,7 @@
        CẤU HÌNH CLOUDINARY CHÍNH CHỦ CHO TÀI KHOẢN CỦA DƯƠNG
        ======================================================== */
     const CLOUD_NAME = "hixbmcww";
-    const UPLOAD_PRESET = "ml_default"; // Mặc định unsigned preset của Cloudinary
+    const UPLOAD_PRESET = "bloom_preset"; // Đã đổi sang preset unsigned chuẩn xác
 
     async function uploadOrderToCloudinary(code, dataURL) {
         try {
@@ -206,15 +206,17 @@
                 let data = await res.json();
                 let secureUrl = data.secure_url;
                 
-                // Lưu mapping Mã In -> URL ảnh vào localStorage để máy quầy đối chiếu siêu tốc
                 let codeIndex = JSON.parse(localStorage.getItem('BLOOM_CLOUDINARY_INDEX') || '{}');
                 codeIndex[code] = secureUrl;
                 localStorage.setItem('BLOOM_CLOUDINARY_INDEX', JSON.stringify(codeIndex));
                 return true;
+            } else {
+                let errData = await res.json();
+                console.error("Cloudinary Error Detail:", errData);
             }
             return false;
         } catch (e) {
-            console.error("Cloudinary Upload Error:", e);
+            console.error("Cloudinary Upload Exception:", e);
             return false;
         }
     }
@@ -225,7 +227,6 @@
             let imgUrl = codeIndex[code];
             if (imgUrl) return imgUrl;
 
-            // Dự phòng lấy trực tiếp theo public_id chuẩn
             let directUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/bloom_order_${code}.png`;
             let checkRes = await fetch(directUrl, { method: 'HEAD' });
             if (checkRes.ok) return directUrl;
@@ -611,7 +612,6 @@
 
         let hiResCanvas = await generateHighResCanvas();
         
-        // Xuất file PNG gốc chuẩn A4 nét căng tuyệt đối (2480x3508px)
         hiResCanvas.toBlob(async (blob) => {
             if(!blob) {
                 alert("Lỗi xuất ảnh!");
@@ -620,7 +620,6 @@
                 return;
             }
 
-            // Đẩy lên Cloudinary Cloud
             let success = await uploadOrderToCloudinary(code, blob);
 
             if(success) {
@@ -628,7 +627,7 @@
                 document.getElementById('modalStep1').style.display = 'none';
                 document.getElementById('modalStep2').style.display = 'block';
             } else {
-                alert("Lỗi đẩy ảnh lên Cloudinary. Vui lòng thử lại!");
+                alert("Lỗi đẩy ảnh lên Cloudinary. Hãy kiểm tra lại Preset Unsigned!");
                 document.getElementById('btnSubmitPrint').disabled = false;
                 document.getElementById('uploadStatus').style.display = 'none';
             }
