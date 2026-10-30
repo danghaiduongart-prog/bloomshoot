@@ -71,6 +71,16 @@
         select, input[type="text"] { width: 100%; padding: 9px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin: 6px 0; font-weight: bold; font-size: 13px; }
         textarea { width: 100%; height: 70px; background: #0b020a; color: #fbe395; border: 1px solid #2a0826; border-radius: 6px; margin-top: 6px; padding: 8px; font-size: 11px; font-family: monospace; }
         .loading-spinner { display: none; font-size: 13px; color: #fbe395; margin-top: 8px; text-align: center; }
+
+        /* ==================== CẤU HÌNH IN CHUẨN XÁC ==================== */
+        @media print {
+            body * { visibility: hidden; }
+            #adminCanvas, #adminCanvas * { visibility: visible; }
+            #adminPanel, .admin-sidebar, #settingsBtn, #loginScreen, #frameSelectScreen, #mainApp, #bottomBar, #confirmModal, p, button { display: none !important; }
+            #adminPanel { display: block !important; position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white !important; padding: 0 !important; }
+            .admin-canvas-wrapper { border: none !important; background: white !important; width: 100% !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+            #adminCanvas { display: block !important; visibility: visible !important; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 100% !important; max-height: 100% !important; width: auto !important; height: auto !important; object-fit: contain !important; }
+        }
     </style>
 </head>
 <body>
@@ -188,7 +198,7 @@
        CẤU HÌNH CLOUDINARY CHÍNH CHỦ CHO TÀI KHOẢN CỦA DƯƠNG
        ======================================================== */
     const CLOUD_NAME = "hixbmcww";
-    const UPLOAD_PRESET = "bloom_preset"; // Đã đổi sang preset unsigned chuẩn xác
+    const UPLOAD_PRESET = "bloom_preset";
 
     async function uploadOrderToCloudinary(code, dataURL) {
         try {
@@ -210,13 +220,10 @@
                 codeIndex[code] = secureUrl;
                 localStorage.setItem('BLOOM_CLOUDINARY_INDEX', JSON.stringify(codeIndex));
                 return true;
-            } else {
-                let errData = await res.json();
-                console.error("Cloudinary Error Detail:", errData);
             }
             return false;
         } catch (e) {
-            console.error("Cloudinary Upload Exception:", e);
+            console.error("Cloudinary Upload Error:", e);
             return false;
         }
     }
