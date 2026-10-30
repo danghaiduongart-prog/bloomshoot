@@ -136,6 +136,7 @@
             <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy.</p>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-action btn-download" onclick="closeConfirmModal()">QUAY LẠI</button>
+                <!-- ĐÃ KHÔI PHỤC LẠI HÀM GỌI MÃ TẠI ĐÂY -->
                 <button class="btn-action btn-print" onclick="generateAndSavePrintCode()">XÁC NHẬN</button>
             </div>
         </div>
@@ -554,12 +555,10 @@
         // Xuất chuẩn PNG nét căng 100% không mất một chi tiết nào
         let dataURL = hiResCanvas.toDataURL('image/png', 1.0);
         
-        // Lưu trữ vào kho đơn hàng chung chia sẻ qua localStorage (hoặc đồng bộ phiên trình duyệt)
         let allOrders = JSON.parse(localStorage.getItem('BLOOM_PRINT_ORDERS_GLOBAL') || '{}');
         allOrders[code] = dataURL;
         localStorage.setItem('BLOOM_PRINT_ORDERS_GLOBAL', JSON.stringify(allOrders));
 
-        // Đồng thời đẩy lên Broadcast để các tab cùng domain nhận ngay lập tức
         try {
             const channel = new BroadcastChannel('bloom_print_channel');
             channel.postMessage({ code: code, data: dataURL });
@@ -588,7 +587,6 @@
         }
     }
 
-    // Lắng nghe tín hiệu từ tab khách trên cùng trình duyệt qua BroadcastChannel
     try {
         const channel = new BroadcastChannel('bloom_print_channel');
         channel.onmessage = (event) => {
