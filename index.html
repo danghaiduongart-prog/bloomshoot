@@ -589,8 +589,7 @@
             fImg.src = frameSrc;
         } else {
             canvas.width = 2480; canvas.height = 3508;
-            frameOverlayImg = null;
-            redrawCanvas();
+            frameOverlayImg = null; redrawCanvas();
         }
     }
 
@@ -978,7 +977,7 @@
         });
     }
 
-    export function exportAdminCode() {
+    function exportAdminCode() {
         let allFrames = getStoredFrames();
         let codeStr = JSON.stringify(allFrames, null, 4);
         document.getElementById('adminOutputCode').value = codeStr;
