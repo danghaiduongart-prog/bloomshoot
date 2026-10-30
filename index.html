@@ -136,7 +136,7 @@
         <div class="modal-card" id="modalStep1">
             <h3>XÁC NHẬN IN ẢNH?</h3>
             <p>Kiểm tra kỹ bố cục trước khi xác nhận để nhận mã in đưa cho nhân viên tại quầy.</p>
-            <div id="uploadStatus" class="loading-spinner">⚡ Đang phát mã in lên Cloud...</div>
+            <div id="uploadStatus" class="loading-spinner">⚡ Đang tạo mã siêu tốc...</div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-action btn-download" id="btnBackModal" onclick="closeConfirmModal()">QUAY LẠI</button>
                 <button class="btn-action btn-print" id="btnSubmitPrint" onclick="generateAndSavePrintCode()">XÁC NHẬN</button>
@@ -157,7 +157,7 @@
             <p style="font-size:11px; color:#b3a5b3; margin-bottom:6px;">Nhập mã in của khách đọc:</p>
             <input type="text" id="inputSearchCode" placeholder="Mã in (VD: XDG)" style="text-transform:uppercase;" maxlength="3">
             <button class="btn-admin" onclick="searchPrintOrder()">🔍 TÌM ẢNH KHÁCH IN</button>
-            <div id="searchStatus" class="loading-spinner">⚡ Đang tải ảnh từ Supabase Cloud...</div>
+            <div id="searchStatus" class="loading-spinner">⚡ Đang tải ảnh siêu tốc...</div>
             
             <hr style="border-color:#2a0826; margin:10px 0;">
             <h4 style="color:#fbe395; font-size:12px; margin-bottom:4px;">🛠️ Quản Trị Tọa Độ Khung:</h4>
@@ -187,7 +187,7 @@
 
 <script>
     /* ========================================================
-       CẤU HÌNH SUPABASE DATABASE LƯU TRỮ VÀ ĐỒNG BỘ ẢNH CHÍNH THỨC
+       CẤU HÌNH SUPABASE DATABASE LƯU TRỮ VÀ ĐỒNG BỘ ẢNH SIÊU TỐC
        ======================================================== */
     const SUPABASE_URL = "https://tocvlwwvrofgmhuvbspn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_AF8QvMxGo-VPnL9b4CCKGA_mJw0YPA4";
@@ -195,13 +195,11 @@
 
     async function uploadOrderToCloud(code, dataURL) {
         try {
-            // Đẩy trực tiếp vào bảng 'print_orders' trên Supabase
             const { data, error } = await _supabase
                 .from('print_orders')
                 .insert([{ code: code, image: dataURL }]);
 
             if (error) {
-                // Nếu chưa tạo bảng 'print_orders', dùng fallback lưu REST API trực tiếp
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/print_orders`, {
                     method: 'POST',
                     headers: {
@@ -233,7 +231,6 @@
                 return data.image;
             }
 
-            // Fallback REST API
             let res = await fetch(`${SUPABASE_URL}/rest/v1/print_orders?code=eq.${code}&select=image`, {
                 method: 'GET',
                 headers: {
@@ -625,7 +622,8 @@
         }
 
         let hiResCanvas = await generateHighResCanvas();
-        let dataURL = hiResCanvas.toDataURL('image/png', 1.0);
+        // Xuất chuẩn JPEG 0.92 tối ưu tốc độ truyền tải siêu tốc nhưng vẫn nét căng
+        let dataURL = hiResCanvas.toDataURL('image/jpeg', 0.92);
         
         // Đẩy lên Supabase Cloud
         await uploadOrderToCloud(code, dataURL);
