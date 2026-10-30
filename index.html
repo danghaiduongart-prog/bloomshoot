@@ -279,6 +279,8 @@
     let uploadedImages = [], slotAssignments = {}, activeSlot = 0, currentFrameType = 'purple_dream';
     let canvas, ctx;
     let frameOverlayImg = null;
+    let originalFrameWidth = 2480;
+    let originalFrameHeight = 3508;
 
     const frameListInfo = [
         { key: 'purple_dream', title: '🔮 Tím Mộng Mơ', file: 'frame (4).png' },
@@ -575,19 +577,23 @@
         if(frameSrc) {
             let fImg = new Image();
             fImg.onload = function() {
-                canvas.width = fImg.width;
-                canvas.height = fImg.height;
+                originalFrameWidth = fImg.width > 100 ? fImg.width : 2480;
+                originalFrameHeight = fImg.height > 100 ? fImg.height : 3508;
+                canvas.width = originalFrameWidth;
+                canvas.height = originalFrameHeight;
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
                 frameOverlayImg = fImg;
                 redrawCanvas();
             };
             fImg.onerror = function() {
+                originalFrameWidth = 2480; originalFrameHeight = 3508;
                 canvas.width = 2480; canvas.height = 3508;
                 frameOverlayImg = null; redrawCanvas();
             };
             fImg.src = frameSrc;
         } else {
+            originalFrameWidth = 2480; originalFrameHeight = 3508;
             canvas.width = 2480; canvas.height = 3508;
             frameOverlayImg = null; redrawCanvas();
         }
@@ -641,9 +647,9 @@
     function generateHighResCanvas() {
         return new Promise(async (resolve) => {
             let offCanvas = document.createElement('canvas');
-            // GIỮ NGUYÊN HOẶC ÉP ĐỘ PHÂN GIẢI GỐC CỦA KHUNG (CHUẨN 2480x3508 HOẶC KÍCH THƯỚC HIỆN TẠI CỦA CANVAS)
-            offCanvas.width = canvas.width;
-            offCanvas.height = canvas.height;
+            // CỐ ĐỊNH CHUẨN XÁC KÍCH THƯỚC GỐC 2480 x 3508 PIXELS ĐỂ IN NÉT CĂNG
+            offCanvas.width = originalFrameWidth;
+            offCanvas.height = originalFrameHeight;
             let oCtx = offCanvas.getContext('2d');
             oCtx.imageSmoothingEnabled = true;
             oCtx.imageSmoothingQuality = 'high';
@@ -687,7 +693,6 @@
 
     async function downloadImage() {
         let hiResCanvas = await generateHighResCanvas();
-        // Xuất chuẩn định dạng PNG với chất lượng tuyệt đối 1.0 (không nén giảm chất lượng)
         hiResCanvas.toBlob((blob) => {
             if (!blob) return;
             let file = new File([blob], `BLOOM_SHOOT_${Date.now()}.png`, { type: 'image/png' });
