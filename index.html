@@ -641,6 +641,7 @@
     function generateHighResCanvas() {
         return new Promise(async (resolve) => {
             let offCanvas = document.createElement('canvas');
+            // GIỮ NGUYÊN HOẶC ÉP ĐỘ PHÂN GIẢI GỐC CỦA KHUNG (CHUẨN 2480x3508 HOẶC KÍCH THƯỚC HIỆN TẠI CỦA CANVAS)
             offCanvas.width = canvas.width;
             offCanvas.height = canvas.height;
             let oCtx = offCanvas.getContext('2d');
@@ -686,6 +687,7 @@
 
     async function downloadImage() {
         let hiResCanvas = await generateHighResCanvas();
+        // Xuất chuẩn định dạng PNG với chất lượng tuyệt đối 1.0 (không nén giảm chất lượng)
         hiResCanvas.toBlob((blob) => {
             if (!blob) return;
             let file = new File([blob], `BLOOM_SHOOT_${Date.now()}.png`, { type: 'image/png' });
