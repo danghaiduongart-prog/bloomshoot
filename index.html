@@ -385,28 +385,34 @@
     ],
     "retro_sun": [
         {
-            "x": 90,
-            "y": 100,
-            "w": 1014.3427734375,
-            "h": 770.768010472065
+            "x": 329,
+            "y": 322,
+            "w": 863,
+            "h": 825
         },
         {
-            "x": 80,
-            "y": 933,
-            "w": 1041.485630580357,
-            "h": 764.8600620718414
+            "x": 1498,
+            "y": 352,
+            "w": 813,
+            "h": 1334
         },
         {
-            "x": 85,
-            "y": 1759,
-            "w": 1036.485630580357,
-            "h": 784.5230204214713
+            "x": 187,
+            "y": 1352,
+            "w": 1244,
+            "h": 1406
         },
         {
-            "x": 77,
-            "y": 2593,
-            "w": 1039.3427734375,
-            "h": 763.8588632628316
+            "x": 1692,
+            "y": 2120,
+            "w": 744,
+            "h": 835
+        },
+        {
+            "x": 128,
+            "y": 2882,
+            "w": 1411,
+            "h": 540
         }
     ],
     "green_check": [],
@@ -583,7 +589,8 @@
             fImg.src = frameSrc;
         } else {
             canvas.width = 2480; canvas.height = 3508;
-            frameOverlayImg = null; redrawCanvas();
+            frameOverlayImg = null;
+            redrawCanvas();
         }
     }
 
@@ -971,7 +978,7 @@
         });
     }
 
-    function exportAdminCode() {
+    export function exportAdminCode() {
         let allFrames = getStoredFrames();
         let codeStr = JSON.stringify(allFrames, null, 4);
         document.getElementById('adminOutputCode').value = codeStr;
