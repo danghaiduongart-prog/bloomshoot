@@ -647,7 +647,7 @@
     function generateHighResCanvas() {
         return new Promise(async (resolve) => {
             let offCanvas = document.createElement('canvas');
-            // CỐ ĐỊNH CHUẨN XÁC KÍCH THƯỚC GỐC 2480 x 3508 PIXELS ĐỂ IN NÉT CĂNG
+            // CỐ ĐỊNH KÍCH THƯỚC GỐC 100% TUYỆT ĐỐI TỪ FILE PNG GỐC (A4 300 DPI)
             offCanvas.width = originalFrameWidth;
             offCanvas.height = originalFrameHeight;
             let oCtx = offCanvas.getContext('2d');
